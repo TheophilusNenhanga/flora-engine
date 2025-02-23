@@ -4,6 +4,9 @@
 #define FLORA_WIDOW_WIDTH 800
 #define FLORA_WIDOW_HEIGHT 600
 
+#define FPS 60
+#define FRAME_TARGET_TIME (1000 / FPS)
+
 
 #endif // !FLORA_CONSTANTS_H
 
