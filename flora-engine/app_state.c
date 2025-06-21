@@ -15,8 +15,8 @@ bool createWindow(ApplicationState* appState) {
 
 	appState->mainWindow = SDL_CreateWindow(
 		"Flora Engine",
-		FLORA_WIDOW_WIDTH,
-		FLORA_WIDOW_HEIGHT,
+		appState->windowWidth,
+		appState->windowHeight,
 		0
 	);
 

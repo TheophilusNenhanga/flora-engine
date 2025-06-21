@@ -13,37 +13,35 @@ void render(ApplicationState* state) {
 }
 
 void applicationLoop(ApplicationState* state, SceneManager* sceneManager) {
-	while (state->running)
-	{
+	while (state->running) {
 		uint64_t frameStart = SDL_GetTicks();
-		getInput(state);
 		
-		// update scene here
-
+		getInput(state);
+		updateScene(sceneManager);
+		SDL_SetRenderDrawColor(state->mainRenderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+		SDL_RenderClear(state->mainRenderer);
 		renderScene(sceneManager);
+		SDL_RenderPresent(state->mainRenderer);
 		
 		uint64_t frameEnd = SDL_GetTicks();
 
 		state->deltaTime = (frameEnd - frameStart) / 1000.0f;
 		state->lastFrameTime = frameEnd;
-
-		SDL_RenderPresent(state->mainRenderer);
 	}
 }
 
 int main(int argc, char* args[]) {
-
 	SceneManager sceneManager = {NULL, NULL};
-
 	ApplicationState appState = {
 	.mainRenderer = NULL,
 	.mainWindow = NULL,
-	.lastFrameTime = 0
+	.lastFrameTime = 0,
+	.windowWidth = 800,
+	.windowHeight = 600,
 	};
 
 	FloraScene floraScene;
 	initFloraScene(&floraScene, &appState);
-	
 	
 	if (!initApplicationState(&appState)) return 1;
 	initSceneManager(&sceneManager, &appState);

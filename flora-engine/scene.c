@@ -1,6 +1,5 @@
 #include "scene.h"
 #include "flora_constants.h"
-#include <stddef.h>
 #include <stdio.h>
 
 void initSceneManager(SceneManager* manager, ApplicationState* state) {
@@ -17,9 +16,9 @@ void updateScene(SceneManager* manager) {
 	if (manager->currentScene) {
 		FloraScene* scene = manager->currentScene;
 		for (int i = 0; i < scene->widgetCount; i++) {
-			FloraWidget widget = scene->widgets[i];
-			if (widget.isVisible) {
-				widget.update(manager->state);
+			FloraWidget* widget = &scene->widgets[i];
+			if (widget->isVisible) {
+				widget->update(widget, manager->state);
 			}
 		}
 	}
@@ -29,9 +28,9 @@ void renderScene(SceneManager* manager) {
 	if (manager->currentScene) {
 		FloraScene* scene = manager->currentScene;
 		for (int i = 0; i < scene->widgetCount; i++) {
-			FloraWidget widget = scene->widgets[i];
-			if (widget.isVisible) {
-				widget.render(manager->state, &widget);
+			FloraWidget* widget = &scene->widgets[i];
+			if (widget->isVisible) {
+				widget->render(widget, manager->state);
 			}
 		}
 	}
@@ -45,28 +44,39 @@ void addWidgetToScene(FloraScene* scene, FloraWidget widget) {
 	}
 }
 
-void baseWidgetRender(ApplicationState* state, FloraWidget* widget) {
+void baseWidgetRender(FloraWidget* widget, ApplicationState* state) {
 	SDL_SetRenderDrawColor(state->mainRenderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
 	const SDL_FRect rect = { widget->posX, widget->posY, widget->width, widget->height };
 	SDL_RenderFillRect(state->mainRenderer, &rect);
 }
 
+void baseWidgetUpdate(FloraWidget* widget, ApplicationState* state) {
+	widget->posX += 1 * state->deltaTime;
+	if (widget->posX > state->windowWidth) {
+		widget->posX = 0;
+	}
+	widget->posY += 1 * state->deltaTime;
+	if (widget->posY > state->windowHeight) {
+		widget->posY = 0;
+	}
+}
+
 void baseCreateScene(ApplicationState* state, FloraScene* scene) {
 	addWidgetToScene(scene, (FloraWidget) {
 		.posX = 50, .posY = 50, .width = 100, .height = 100,
-			.isVisible = true, .update = NULL, .render = baseWidgetRender
+			.isVisible = true, .update = baseWidgetUpdate, .render = baseWidgetRender
 	});
 	addWidgetToScene(scene, (FloraWidget) {
-		.posX = 252, .posY = 70, .width = 10, .height = 100,
-			.isVisible = true, .update = NULL, .render = baseWidgetRender
+		.posX = 250, .posY = 70, .width = 10, .height = 50,
+			.isVisible = true, .update = baseWidgetUpdate, .render = baseWidgetRender
 	});
 	addWidgetToScene(scene, (FloraWidget) {
-		.posX = 750, .posY = 512, .width = 18, .height = 60,
-			.isVisible = true, .update = NULL, .render = baseWidgetRender
+		.posX = 750, .posY = 500, .width = 30, .height = 60,
+			.isVisible = true, .update = baseWidgetUpdate, .render = baseWidgetRender
 	});
 	addWidgetToScene(scene, (FloraWidget) {
-		.posX = 40, .posY = 56, .width = 123, .height = 10,
-			.isVisible = true, .update = NULL, .render = baseWidgetRender
+		.posX = 400, .posY = 55, .width = 120, .height = 20,
+			.isVisible = true, .update = baseWidgetUpdate, .render = baseWidgetRender
 	});
 }
 
@@ -84,7 +94,7 @@ void baseDestroyScene(ApplicationState* state, FloraScene* scene) {
 void initFloraScene(FloraScene* scene, ApplicationState* state) {
 	scene->onCreate = baseCreateScene;
 	scene->onDestroy = baseDestroyScene;
-	scene->widgetCount = 0;	
+	scene->widgetCount = 0;
 	scene->widgets = (FloraWidget*)malloc(MAX_FLORA_WIDGETS * sizeof(FloraWidget));
 	if (!scene->widgets) {
 		printf("Log: Failed to allocate memory for scene widgets. Aborting!\n");

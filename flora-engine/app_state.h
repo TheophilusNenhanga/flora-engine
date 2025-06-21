@@ -9,6 +9,8 @@ typedef struct {
 	uint64_t lastFrameTime;
 	double deltaTime;
 	bool running;
+	int windowWidth;
+	int windowHeight;
 } ApplicationState;
 
 bool initApplicationState(ApplicationState* appState);

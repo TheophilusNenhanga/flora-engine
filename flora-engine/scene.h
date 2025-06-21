@@ -7,15 +7,15 @@ typedef struct FloraWidget FloraWidget;
 typedef struct FloraScene FloraScene;
 
 struct FloraWidget{
-	int posX;
-	int posY;
-	int width;
-	int height;
+	double posX;
+	double posY;
+	double width;
+	double height;
 	bool isVisible;
 
-	void (*update)(ApplicationState* state);
-	void (*render)(ApplicationState* state, FloraWidget* widget);
-	void (*onClick)(ApplicationState* state, int mouseX, int mouseY);
+	void (*update)(FloraWidget* widget, ApplicationState* state);
+	void (*render)(FloraWidget* widget, ApplicationState* state);
+	void (*onClick)(FloraWidget* widget, ApplicationState* state, int mouseX, int mouseY);
 };
 
 struct FloraScene {
@@ -32,6 +32,7 @@ typedef struct {
 
 void initSceneManager(SceneManager* manager, ApplicationState* state);
 void renderScene(SceneManager* manager);
+void updateScene(SceneManager* manager);
 void baseCreateScene(ApplicationState* state, FloraScene* scene);
 void initFloraScene(FloraScene* scene, ApplicationState* state);
 void setCurrentScene(SceneManager* manager, FloraScene* scene);
