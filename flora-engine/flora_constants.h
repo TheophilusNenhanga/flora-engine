@@ -7,6 +7,8 @@
 #define FPS 60
 #define FRAME_TARGET_TIME (1000 / FPS)
 
+#define MAX_FLORA_WIDGETS 8
+
 
 #endif // !FLORA_CONSTANTS_H
 

@@ -133,16 +133,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="game_state.c" />
+    <ClCompile Include="app_state.c" />
     <ClCompile Include="input_handling.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="scene.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="flora_constants.h" />
-    <ClInclude Include="game_state.h" />
+    <ClInclude Include="app_state.h" />
     <ClInclude Include="input_handling.h" />
     <ClInclude Include="scene.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="readme.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

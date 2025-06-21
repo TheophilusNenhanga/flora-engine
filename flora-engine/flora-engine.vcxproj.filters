@@ -24,7 +24,7 @@
     <ClCompile Include="scene.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game_state.c">
+    <ClCompile Include="app_state.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -38,8 +38,11 @@
     <ClInclude Include="scene.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_state.h">
+    <ClInclude Include="app_state.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="readme.md" />
   </ItemGroup>
 </Project>

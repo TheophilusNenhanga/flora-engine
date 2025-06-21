@@ -2,55 +2,61 @@
 #include <stdbool.h>
 #include <SDL.h>
 
-#include "game_state.h"
+#include "app_state.h"
 #include "input_handling.h"
 #include "scene.h"
 
-void render(GameState* state) {
-	SDL_SetRenderDrawColor(state->renderer, 0, 0, 0, 255);
-	SDL_RenderClear(state->renderer);
-	SDL_RenderPresent(state->renderer);
+void render(ApplicationState* state) {
+	SDL_SetRenderDrawColor(state->mainRenderer, 0, 0, 0, 255);
+	SDL_RenderClear(state->mainRenderer);
+	SDL_RenderPresent(state->mainRenderer);
 }
 
-void gameLoop(GameState* state, SceneManager* sceneManager) {
+void applicationLoop(ApplicationState* state, SceneManager* sceneManager) {
 	while (state->running)
 	{
 		uint64_t frameStart = SDL_GetTicks();
 		getInput(state);
 		
-		updateScene(sceneManager);
-		
+		// update scene here
+
 		renderScene(sceneManager);
 		
 		uint64_t frameEnd = SDL_GetTicks();
 
 		state->deltaTime = (frameEnd - frameStart) / 1000.0f;
 		state->lastFrameTime = frameEnd;
+
+		SDL_RenderPresent(state->mainRenderer);
 	}
 }
 
 int main(int argc, char* args[]) {
 
-	SceneManager sceneManager = {NULL, NULL, NULL};
+	SceneManager sceneManager = {NULL, NULL};
 
-	GameState gameState = {
-	.renderer = NULL,
-	.window = NULL,
+	ApplicationState appState = {
+	.mainRenderer = NULL,
+	.mainWindow = NULL,
 	.lastFrameTime = 0
 	};
 
+	FloraScene floraScene;
+	initFloraScene(&floraScene, &appState);
 	
-	if (!initGameState(&gameState)) return 1;
-	initSceneManager(&sceneManager, &gameState);
+	
+	if (!initApplicationState(&appState)) return 1;
+	initSceneManager(&sceneManager, &appState);
+	setCurrentScene(&sceneManager, &floraScene);
 
-	gameState.running = true;
+	appState.running = true;
 
-	gameLoop(&gameState, &sceneManager);
+	applicationLoop(&appState, &sceneManager);
 
-	if (!destroyWindow(&gameState)) {
+	if (!destroyWindow(&appState)) {
 		return 1;
 	}
 
-	if (!cleanupGameState(&gameState)) return 1;
+	if (!cleanupApplicationState(&appState)) return 1;
 	return 0;
 }

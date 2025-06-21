@@ -1,6 +1,6 @@
 #include "input_handling.h"
 
-void getInput(GameState* state) {
+void getInput(ApplicationState* state) {
 	SDL_Event event;
 
 	while (SDL_PollEvent(&event)) {
