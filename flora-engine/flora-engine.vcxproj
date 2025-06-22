@@ -134,13 +134,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="app_state.c" />
+    <ClCompile Include="flora_widget.c" />
     <ClCompile Include="input_handling.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="scene.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="flora_constants.h" />
     <ClInclude Include="app_state.h" />
+    <ClInclude Include="flora_widget.h" />
     <ClInclude Include="input_handling.h" />
     <ClInclude Include="scene.h" />
   </ItemGroup>

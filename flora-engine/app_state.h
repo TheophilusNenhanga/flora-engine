@@ -1,7 +1,9 @@
-#ifndef GAME_STATE_H
-#define GAME_STATE_H
+#ifndef APP_STATE_H
+#define APP_STATE_H
 
+#include <stdbool.h>
 #include <SDL.h>
+#include <stdint.h>
 
 typedef struct {
 	SDL_Window* mainWindow;
@@ -11,7 +13,7 @@ typedef struct {
 	bool running;
 	int windowWidth;
 	int windowHeight;
-} ApplicationState;
+}ApplicationState;
 
 bool initApplicationState(ApplicationState* appState);
 bool cleanupApplicationState(ApplicationState* appState);
@@ -19,6 +21,4 @@ bool cleanupApplicationState(ApplicationState* appState);
 bool createWindow(ApplicationState* appState);
 bool destroyWindow(ApplicationState* appState);
 
-#endif // !GAME_STATE_H
-
-
+#endif // !APP_STATE_H

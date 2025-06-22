@@ -1,11 +1,7 @@
 #include <SDL.h>
-
-#include "app_state.h"
-
-#include <stdbool.h>
 #include <stdio.h>
 
-#include "flora_constants.h"
+#include "app_state.h"
 
 bool createWindow(ApplicationState* appState) {
 	if (!SDL_Init(SDL_INIT_VIDEO)) {

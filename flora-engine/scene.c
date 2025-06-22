@@ -1,6 +1,6 @@
-#include "scene.h"
-#include "flora_constants.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include "scene.h"
 
 void initSceneManager(SceneManager* manager, ApplicationState* state) {
 	manager->state = state;
@@ -38,27 +38,22 @@ void renderScene(SceneManager* manager) {
 
 void addWidgetToScene(FloraScene* scene, FloraWidget widget) {
 	if (!scene) { return; }
-	if (scene->widgetCount < MAX_FLORA_WIDGETS) {
-		scene->widgets[scene->widgetCount++] = widget;
-		printf("Log: Widget added to scene. Total widgets: %d\n", scene->widgetCount);
-	}
-}
 
-void baseWidgetRender(FloraWidget* widget, ApplicationState* state) {
-	SDL_SetRenderDrawColor(state->mainRenderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
-	const SDL_FRect rect = { widget->posX, widget->posY, widget->width, widget->height };
-	SDL_RenderFillRect(state->mainRenderer, &rect);
-}
+	if (scene->widgetCount + 1 >= scene->widgetCapacity) {
+		int newCapacity = scene->widgetCapacity * 2;
+		FloraWidget* newWidgets = (FloraWidget*)realloc(scene->widgets, newCapacity * sizeof(FloraWidget));
+		if (!newWidgets) {
+			printf("Log: Failed to allocate memory for new widgets. Aborting!\n");
+			fprintf(stderr, "Error: Failed to allocate memory for new widgets.\n");
+			exit(1);
+		}
+		scene->widgets = newWidgets;
+		scene->widgetCapacity = newCapacity;
+		printf("Log: Resized widget array to new capacity: %d\n", newCapacity);
+	}
 
-void baseWidgetUpdate(FloraWidget* widget, ApplicationState* state) {
-	widget->posX += 1 * state->deltaTime;
-	if (widget->posX > state->windowWidth) {
-		widget->posX = 0;
-	}
-	widget->posY += 1 * state->deltaTime;
-	if (widget->posY > state->windowHeight) {
-		widget->posY = 0;
-	}
+	scene->widgets[scene->widgetCount++] = widget;
+	printf("Log: Widget added to scene. Total widgets: %d\n", scene->widgetCount);
 }
 
 void baseCreateScene(ApplicationState* state, FloraScene* scene) {
@@ -95,7 +90,8 @@ void initFloraScene(FloraScene* scene, ApplicationState* state) {
 	scene->onCreate = baseCreateScene;
 	scene->onDestroy = baseDestroyScene;
 	scene->widgetCount = 0;
-	scene->widgets = (FloraWidget*)malloc(MAX_FLORA_WIDGETS * sizeof(FloraWidget));
+	scene->widgetCapacity = 8;
+	scene->widgets = (FloraWidget*)malloc(scene->widgetCapacity * sizeof(FloraWidget));
 	if (!scene->widgets) {
 		printf("Log: Failed to allocate memory for scene widgets. Aborting!\n");
 		fprintf(stderr, "Error: Failed to allocate memory for scene widgets.\n");

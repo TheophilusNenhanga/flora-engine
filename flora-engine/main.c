@@ -2,9 +2,9 @@
 #include <stdbool.h>
 #include <SDL.h>
 
-#include "app_state.h"
 #include "input_handling.h"
 #include "scene.h"
+#include "app_state.h"
 
 void render(ApplicationState* state) {
 	SDL_SetRenderDrawColor(state->mainRenderer, 0, 0, 0, 255);

@@ -2,28 +2,15 @@
 #define SCENE_H
 
 #include "app_state.h"
+#include "flora_widget.h"
 
-typedef struct FloraWidget FloraWidget;
-typedef struct FloraScene FloraScene;
-
-struct FloraWidget{
-	double posX;
-	double posY;
-	double width;
-	double height;
-	bool isVisible;
-
-	void (*update)(FloraWidget* widget, ApplicationState* state);
-	void (*render)(FloraWidget* widget, ApplicationState* state);
-	void (*onClick)(FloraWidget* widget, ApplicationState* state, int mouseX, int mouseY);
-};
-
-struct FloraScene {
-	void (*onCreate)(ApplicationState* state, FloraScene* scene);
-	void (*onDestroy)(ApplicationState* state, FloraScene* scene);
+typedef struct FloraScene {
+	void (*onCreate)(ApplicationState* state, struct FloraScene* scene);
+	void (*onDestroy)(ApplicationState* state, struct FloraScene* scene);
 	FloraWidget* widgets;
 	int widgetCount;
-};
+	int widgetCapacity;
+} FloraScene;
 
 typedef struct {
 	FloraScene* currentScene;
