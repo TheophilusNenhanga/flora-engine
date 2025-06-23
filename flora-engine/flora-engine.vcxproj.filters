@@ -27,11 +27,11 @@
     <ClCompile Include="app_state.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="flora_widget.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="flora_constants.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="input_handling.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -39,6 +39,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="app_state.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="flora_widget.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="flora_constants.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

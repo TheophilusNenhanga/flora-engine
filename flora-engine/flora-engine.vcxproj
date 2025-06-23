@@ -141,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="app_state.h" />
+    <ClInclude Include="flora_constants.h" />
     <ClInclude Include="flora_widget.h" />
     <ClInclude Include="input_handling.h" />
     <ClInclude Include="scene.h" />
