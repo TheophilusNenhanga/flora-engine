@@ -27,7 +27,7 @@ void baseWidgetOnClick(FloraWidget *widget, ApplicationState *state,
   widget->posY = event->y - 10;
 }
 
-bool widgetContainsPoint(FloraWidget *widget, int x, int y) {
+bool widgetContainsPoint(FloraWidget *widget, float x, float y) {
   if (!widget || !widget->isVisible)
     return false;
   return (x >= widget->posX && x <= widget->posX + widget->width &&

@@ -5,8 +5,29 @@
 #include <SDL.h>
 #include <stdint.h>
 
+typedef enum {
+	FLORA_MOUSE_MOVE,
+	FLORA_MOUSE_BUTTON_DOWN,
+	FLORA_MOUSE_BUTTON_UP,
+	FLORA_KEY_DOWN,
+	FLORA_KEY_UP,
+	FLORA_QUIT,
+	FLORA_UNHANDLED
+} FloraEventType;
+
 typedef struct {
-	SDL_Event* events;
+	FloraEventType type;
+	union {
+		SDL_MouseMotionEvent mouseMotion;
+		SDL_MouseButtonEvent mouseButton;
+		SDL_KeyboardEvent key;
+		SDL_QuitEvent quit;
+		// Add more event types as needed
+	} as;
+} FloraEvent; 
+
+typedef struct {
+	FloraEvent** events;
 	// The index of the last event added to the queue
 	int back;
 	// The total number of events the queue can hold
@@ -14,20 +35,6 @@ typedef struct {
 	// The index of the next event to be processed
 	int front;
 }EventQueue;
-
-typedef struct {
-	SDL_Event event;
-	enum {
-		MOUSE_MOVE,
-		MOUSE_BUTTON_DOWN,
-		MOUSE_BUTTON_UP,
-		KEY_DOWN,
-		KEY_UP,
-	} type;
-	int mouseX;
-	int mouseY;
-	int keyCode;
-} FloraEvent; // Maybe we can use this event instead of SDL_Event directly
 
 typedef struct {
 	SDL_Window* mainWindow;
@@ -48,8 +55,10 @@ bool destroyWindow(ApplicationState* appState);
 
 bool initEventQueue(EventQueue* queue);
 bool cleanupEventQueue(EventQueue* queue);
-bool enqueueEventQueue(EventQueue* queue, SDL_Event event);
-bool dequeueEventQueue(EventQueue* queue, SDL_Event* event);
+bool enqueueEventQueue(EventQueue* queue, FloraEvent* event);
+bool dequeueEventQueue(EventQueue* queue, FloraEvent** event);
 bool isEventQueueEmpty(EventQueue* queue);
+
+bool cleanupFloraEvent(FloraEvent* event);
 
 #endif // !APP_STATE_H

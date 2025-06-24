@@ -29,5 +29,5 @@ void baseWidgetRender(FloraWidget* widget, struct ApplicationState* state);
 void baseWidgetUpdate(FloraWidget* widget, struct ApplicationState* state);
 void baseWidgetOnClick(FloraWidget* widget, struct ApplicationState* state, SDL_MouseButtonEvent* event);
 
-bool widgetContainsPoint(FloraWidget* widget, int x, int y);
+bool widgetContainsPoint(FloraWidget* widget, float x, float y);
 #endif

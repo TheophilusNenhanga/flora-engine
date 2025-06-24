@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "app_state.h"
+#include "flora_constants.h"
 
 bool createWindow(ApplicationState *appState) {
   if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -59,10 +60,10 @@ bool cleanupApplicationState(ApplicationState *appState) {
 bool initEventQueue(EventQueue *queue) {
   if (!queue)
     return false;
-  queue->capacity = 8;
+  queue->capacity = INITIAL_EVENT_QUEUE_CAPACITY;
   queue->front = 0;
   queue->back = 0;
-  queue->events = malloc(queue->capacity * sizeof(SDL_Event));
+  queue->events = malloc(queue->capacity * sizeof(FloraEvent*));
   if (!queue->events) {
     fprintf(stderr, "Error: Failed to allocate memory for event queue.\n");
     printf("Log: Failed to allocate memory for event queue. Shutting Down.\n");
@@ -84,16 +85,16 @@ bool cleanupEventQueue(EventQueue *queue) {
   return true;
 }
 
-bool enqueueEventQueue(EventQueue *queue, SDL_Event event) {
-  if (!queue)
+bool enqueueEventQueue(EventQueue *queue, FloraEvent* event) {
+  if (!queue || !event)
     return false;
   int nextBack = (queue->back + 1) % queue->capacity;
 
   // Check if the queue is full
   if (nextBack == queue->front) {
 
-    int newCapacity = queue->capacity * 2;
-    SDL_Event *newEvents = malloc(newCapacity * sizeof(SDL_Event));
+    int newCapacity = queue->capacity * GROWTH_FACTOR;
+    FloraEvent **newEvents = malloc(newCapacity * sizeof(FloraEvent*));
     if (!newEvents) {
       fprintf(stderr, "Error: Failed to allocate memory for new events.\n");
       return false;
@@ -120,7 +121,7 @@ bool enqueueEventQueue(EventQueue *queue, SDL_Event event) {
   return true;
 }
 
-bool dequeueEventQueue(EventQueue *queue, SDL_Event *event) {
+bool dequeueEventQueue(EventQueue *queue, FloraEvent **event) {
   if (!queue || !event)
     return false;
 
@@ -137,4 +138,11 @@ bool isEventQueueEmpty(EventQueue *queue) {
   if (!queue)
     return true;
   return queue->front == queue->back;
+}
+
+bool cleanupFloraEvent(FloraEvent *event) {
+  if (!event)
+    return false;
+  free(event);
+  return true;
 }
