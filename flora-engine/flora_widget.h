@@ -13,12 +13,17 @@ typedef struct {
 	uint8_t a;
 } FloraColour;
 
+typedef struct {
+	FloraColour colour;
+	FloraColour borderColour;
+} FloraWidgetStyle;
+
 typedef struct FloraWidget {
 	float posX;
 	float posY;
 	float width;
 	float height;
-	FloraColour colour;
+	FloraWidgetStyle style;
 	void (*update)(struct FloraWidget* widget, struct ApplicationState* state);
 	void (*render)(struct FloraWidget* widget, struct ApplicationState* state);
 	void (*onClick)(struct FloraWidget* widget, struct ApplicationState* state, SDL_MouseButtonEvent* event);

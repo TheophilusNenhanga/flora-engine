@@ -128,57 +128,23 @@ void addWidgetToScene(FloraScene* scene, FloraWidget widget) {
 }
 
 void baseCreateScene(ApplicationState* state, FloraScene* scene) {
-	addWidgetToScene(scene,
-					 (FloraWidget) {
-		.posX = 50,
-			.posY = 50,
-			.width = 100,
-			.height = 100,
-			.isVisible = true,
-			.update = baseWidgetUpdate,
-			.render = baseWidgetRender,
-			.onClick = baseWidgetOnClick,
-			.colour = (FloraColour){
-				.r = 25, .g = 132, .b = 191, .a = 255 }
-	});
-	addWidgetToScene(scene,
-					 (FloraWidget) {
-		.posX = 250,
-			.posY = 70,
-			.width = 10,
-			.height = 50,
-			.isVisible = true,
-			.update = baseWidgetUpdate,
-			.render = baseWidgetRender,
-			.onClick = baseWidgetOnClick,
-			.colour = (FloraColour){
-				.r = 213, .g = 171, .b = 12, .a = 255 }
-	});
-	addWidgetToScene(scene,
-					 (FloraWidget) {
-		.posX = 750,
-			.posY = 500,
-			.width = 30,
-			.height = 60,
-			.isVisible = true,
-			.update = baseWidgetUpdate,
-			.render = baseWidgetRender,
-			.onClick = baseWidgetOnClick,
-			.colour = (FloraColour){
-				.r = 255, .g = 122, .b = 222, .a = 255 }
-	});
-	addWidgetToScene(
-		scene, (FloraWidget) {
-		.posX = 400,
-			.posY = 55,
-			.width = 120,
-			.height = 20,
-			.isVisible = true,
-			.update = baseWidgetUpdate,
-			.render = baseWidgetRender,
-			.onClick = baseWidgetOnClick,
-			.colour = (FloraColour){ .r = 55, .g = 22, .b = 66, .a = 255 }
-	});
+	for (int i = 0; i < 5; i++) {
+		addWidgetToScene(scene,
+						 (FloraWidget) {
+			.posX = 50,
+				.posY = 50 + i * 50,
+				.width = 50,
+				.height = 50,
+				.isVisible = true,
+				.update = baseWidgetUpdate,
+				.render = baseWidgetRender,
+				.onClick = baseWidgetOnClick,
+				.style = (FloraWidgetStyle){
+					.colour = (FloraColour){.r = 25, .g = 132, .b = 191, .a = 255 },
+					.borderColour = (FloraColour){.r = 255, .g = 255, .b = 255, .a = 255 }
+				}
+			});
+	}
 }
 
 void baseDestroyScene(ApplicationState* state, FloraScene* scene) {

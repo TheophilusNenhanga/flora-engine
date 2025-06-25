@@ -3,11 +3,17 @@
 #include <stdio.h>
 
 void baseWidgetRender(FloraWidget *widget, ApplicationState *state) {
-  SDL_SetRenderDrawColor(state->mainRenderer, widget->colour.r,
-                         widget->colour.g, widget->colour.b, widget->colour.a);
+  SDL_SetRenderDrawColor(state->mainRenderer, widget->style.colour.r,
+                         widget->style.colour.g, widget->style.colour.b, widget->style.colour.a);
   const SDL_FRect rect = {widget->posX, widget->posY, widget->width,
                           widget->height};
+  // Draw the rectangle
   SDL_RenderFillRect(state->mainRenderer, &rect);
+  // Draw the border
+  SDL_SetRenderDrawColor(state->mainRenderer, widget->style.borderColour.r,
+                         widget->style.borderColour.g, widget->style.borderColour.b,
+						 widget->style.borderColour.a);
+  SDL_RenderRect(state->mainRenderer, &rect);
 }
 
 void baseWidgetUpdate(FloraWidget *widget, ApplicationState *state) {

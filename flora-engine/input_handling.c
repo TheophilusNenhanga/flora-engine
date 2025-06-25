@@ -66,22 +66,10 @@ void getInput(ApplicationState *state) {
       break;
     }
     case SDL_EVENT_KEY_DOWN: {
-      switch (sdlEvent.key.key) {
-      case SDLK_ESCAPE: 
-      case SDLK_LEFT:
-      case SDLK_RIGHT:
-      case SDLK_UP:
-      case SDLK_DOWN:
-      case SDLK_SPACE:
-      case SDLK_RETURN:
-      case SDLK_BACKSPACE: {
-          FloraEvent* floraEvent = newFloraEvent(&sdlEvent);
+        FloraEvent* floraEvent = newFloraEvent(&sdlEvent);
         enqueueEventQueue(&state->eventQueue, floraEvent);
         break;
       }
-      }
-      break;
-    }
     case SDL_EVENT_KEY_UP: {
       switch (sdlEvent.key.key) {
       case SDLK_LEFT: {
