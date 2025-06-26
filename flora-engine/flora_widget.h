@@ -18,21 +18,37 @@ typedef struct {
 	FloraColour borderColour;
 } FloraWidgetStyle;
 
-typedef struct FloraWidget {
+typedef enum {
+	LEFT_TO_RIGHT,
+	TOP_TO_BOTTOM,
+} FloraLayout;
+
+typedef struct FloraWidget FloraWidget;
+
+struct FloraWidget {
 	float posX;
 	float posY;
 	float width;
 	float height;
 	FloraWidgetStyle style;
+	FloraLayout layout;
+	FloraWidget* parent;
+	FloraWidget* children;
+	int childCount;
+	int childCapacity;
+
 	void (*update)(struct FloraWidget* widget, struct ApplicationState* state);
 	void (*render)(struct FloraWidget* widget, struct ApplicationState* state);
 	void (*onClick)(struct FloraWidget* widget, struct ApplicationState* state, SDL_MouseButtonEvent* event);
 	bool isVisible;
-} FloraWidget;
+};
 
 void baseWidgetRender(FloraWidget* widget, struct ApplicationState* state);
 void baseWidgetUpdate(FloraWidget* widget, struct ApplicationState* state);
 void baseWidgetOnClick(FloraWidget* widget, struct ApplicationState* state, SDL_MouseButtonEvent* event);
 
 bool widgetContainsPoint(FloraWidget* widget, float x, float y);
+
+
+
 #endif

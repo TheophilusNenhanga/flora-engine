@@ -4,14 +4,53 @@
 
 #include "flora_constants.h"
 
+void cleanupFloraWidget(FloraWidget* widget) {
+	if (widget->children) {
+		free(widget->children);
+		widget->children = NULL;
+		widget->childCount = 0;
+		widget->childCapacity = 0;
+		printf("Log: Widget children cleaned up and memory freed.\n");
+	}
+	widget->parent = NULL;
+	widget->isVisible = false;
+}
+
+void baseDestroyScene(ApplicationState* state, FloraScene* scene) {
+	if (scene->widgets) {
+		for (int i = 0; i < scene->widgetCount; i++) {
+			cleanupFloraWidget(&scene->widgets[i]);
+		}
+		free(scene->widgets);
+		scene->widgets = NULL;
+		scene->widgetCount = 0;
+		printf("Log: Scene destroyed and memory freed.\n");
+	}
+	scene->onCreate = NULL;
+	scene->onDestroy = NULL;
+}
+
 void initSceneManager(SceneManager* manager, ApplicationState* state) {
 	manager->state = state;
 	manager->currentScene = NULL;
 }
 
+void cleanupSceneManager(SceneManager* manager) {
+	if (manager->currentScene) {
+		FloraScene* scene = manager->currentScene;
+		if (scene->onDestroy) {
+			scene->onDestroy(manager->state, scene);
+		}
+		free(scene->widgets);
+		manager->currentScene = NULL;
+	}
+	printf("Log: Scene manager cleaned up successfully.\n");
+}
+
 void setCurrentScene(SceneManager* manager, FloraScene* scene) {
 	manager->currentScene = scene;
 	scene->onCreate(manager->state, scene);
+	scene->onDestroy = baseDestroyScene;
 }
 
 void updateScene(SceneManager* manager) {
@@ -104,12 +143,12 @@ void renderScene(SceneManager* manager) {
 	}
 }
 
-void addWidgetToScene(FloraScene* scene, FloraWidget widget) {
+int addWidgetToScene(FloraScene* scene, FloraWidget widget) {
 	if (!scene) {
-		return;
+		return -1;
 	}
 
-	if (scene->widgetCount + 1 >= scene->widgetCapacity) {
+	if (scene->widgetCount + 1 > scene->widgetCapacity) {
 		int newCapacity = scene->widgetCapacity * 2;
 		FloraWidget* newWidgets = (FloraWidget*)realloc(
 			scene->widgets, newCapacity * sizeof(FloraWidget));
@@ -125,37 +164,122 @@ void addWidgetToScene(FloraScene* scene, FloraWidget widget) {
 
 	scene->widgets[scene->widgetCount++] = widget;
 	printf("Log: Widget added to scene. Total widgets: %d\n", scene->widgetCount);
+	return scene->widgetCount - 1;
+}
+
+bool addChildToWidget(FloraWidget* parent, FloraWidget* child) {
+	if (!parent || !child) {
+		return false;
+	}
+
+	if (parent->children == NULL) {
+		parent->children = (FloraWidget*)malloc(INITIAL_CHILD_WIDGET_CAPACITY * sizeof(FloraWidget));
+		if (!parent->children) {
+			printf("Log: Failed to allocate memory for children. Aborting!\n");
+			fprintf(stderr, "Error: Failed to allocate memory for children.\n");
+			exit(1);
+		}
+		parent->childCapacity = INITIAL_CHILD_WIDGET_CAPACITY;
+		printf("Log: Initialized child array with capacity: %d\n", parent->childCapacity);
+	}
+	
+	if (parent->childCount + 1 > parent->childCapacity) {
+		int newCapacity = parent->childCapacity * GROWTH_FACTOR;
+		FloraWidget* newChildren = (FloraWidget*)realloc(
+			parent->children, newCapacity * sizeof(FloraWidget));
+		if (!newChildren) {
+			printf("Log: Failed to allocate memory for new children. Aborting!\n");
+			fprintf(stderr, "Error: Failed to allocate memory for new children.\n");
+			exit(1);
+		}
+		parent->children = newChildren;
+		parent->childCapacity = newCapacity;
+		printf("Log: Resized child array to new capacity: %d\n", newCapacity);
+	}
+
+	parent->children[parent->childCount++] = *child;
+	child->parent = parent;
+	printf("Log: Child widget added to parent. Total children: %d\n", parent->childCount);
+	return true;
 }
 
 void baseCreateScene(ApplicationState* state, FloraScene* scene) {
-	for (int i = 0; i < 5; i++) {
-		addWidgetToScene(scene,
-						 (FloraWidget) {
-			.posX = 50,
-				.posY = 50 + i * 50,
+	FloraWidget baseWidget = { .posX = 50,
+				.posY = 50 + 1 * 50,
 				.width = 50,
 				.height = 50,
 				.isVisible = true,
+				.children = NULL,
+				.parent = NULL,
+				.childCount = 0,
 				.update = baseWidgetUpdate,
 				.render = baseWidgetRender,
 				.onClick = baseWidgetOnClick,
 				.style = (FloraWidgetStyle){
 					.colour = (FloraColour){.r = 25, .g = 132, .b = 191, .a = 255 },
 					.borderColour = (FloraColour){.r = 255, .g = 255, .b = 255, .a = 255 }
+				},
+		.layout = LEFT_TO_RIGHT
+	};
+	FloraWidget child1 = { .posX = 50,
+				.posY = 50,
+				.width = 125,
+				.height = 25,
+				.isVisible = true,
+				.children = NULL,
+				.childCount = 0,
+				.parent = NULL,
+				.update = baseWidgetUpdate,
+				.render = baseWidgetRender,
+				.onClick = baseWidgetOnClick,
+				.style = (FloraWidgetStyle){
+					.colour = (FloraColour){.r = 255, .g = 0, .b = 0, .a = 255 },
+					.borderColour = (FloraColour){.r = 255, .g = 255, .b = 255, .a = 255 }
 				}
-			});
-	}
-}
+	};
 
-void baseDestroyScene(ApplicationState* state, FloraScene* scene) {
-	if (scene->widgets) {
-		free(scene->widgets);
-		scene->widgets = NULL;
-		scene->widgetCount = 0;
-		printf("Log: Scene destroyed and memory freed.\n");
+	FloraWidget child2 = { .posX = 50,
+				.posY = 50,
+				.width = 40,
+				.height = 60,
+				.isVisible = true,
+				.children = NULL,
+				.childCount = 0,
+				.parent = NULL,
+				.update = baseWidgetUpdate,
+				.render = baseWidgetRender,
+				.onClick = baseWidgetOnClick,
+				.style = (FloraWidgetStyle){
+					.colour = (FloraColour){.r = 255, .g = 0, .b = 0, .a = 255 },
+					.borderColour = (FloraColour){.r = 255, .g = 255, .b = 255, .a = 255 }
+				}
+	};
+
+	int baseIndex = addWidgetToScene(scene, baseWidget);
+
+	if (baseIndex == -1) {
+		printf("Log: Failed to add base widget to scene.\n");
+		fprintf(stderr, "Error: Failed to add base widget to scene.\n");
+		exit(1);
 	}
-	scene->onCreate = NULL;
-	scene->onDestroy = NULL;
+	int child1Index = addWidgetToScene(scene, child1);
+
+	if (child1Index == -1) {
+		printf("Log: Failed to add child widget to scene.\n");
+		fprintf(stderr, "Error: Failed to add child widget to scene.\n");
+		exit(1);
+	}
+
+	int child2Index = addWidgetToScene(scene, child2);
+
+	if (child2Index == -1) {
+		printf("Log: Failed to add child widget to scene.\n");
+		fprintf(stderr, "Error: Failed to add child widget to scene.\n");
+		exit(1);
+	}
+
+	addChildToWidget(&scene->widgets[baseIndex], &scene->widgets[child1Index]);
+	addChildToWidget(&scene->widgets[baseIndex], &scene->widgets[child2Index]);
 }
 
 void initFloraScene(FloraScene* scene, ApplicationState* state) {

@@ -61,6 +61,8 @@ int main(int argc, char *args[]) {
 
   applicationLoop(&appState, &sceneManager);
 
+  cleanupSceneManager(&sceneManager);
+
   if (!destroyWindow(&appState)) {
     return FLORA_ENGINE_FATAL;
   }

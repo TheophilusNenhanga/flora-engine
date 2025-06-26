@@ -23,5 +23,6 @@ void updateScene(SceneManager* manager);
 void baseCreateScene(ApplicationState* state, FloraScene* scene);
 void initFloraScene(FloraScene* scene, ApplicationState* state);
 void setCurrentScene(SceneManager* manager, FloraScene* scene);
+void cleanupSceneManager(SceneManager* manager);
 
 #endif // !SCENE_H
