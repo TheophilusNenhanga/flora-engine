@@ -14,8 +14,16 @@ typedef struct {
 } FloraColour;
 
 typedef struct {
+	float left;
+	float right;
+	float top;
+	float bottom;
+} FloraPadding;
+
+typedef struct {
 	FloraColour colour;
 	FloraColour borderColour;
+	FloraPadding padding;
 } FloraWidgetStyle;
 
 typedef enum {
@@ -26,6 +34,7 @@ typedef enum {
 typedef struct FloraWidget FloraWidget;
 
 struct FloraWidget {
+	uint16_t id;
 	float posX;
 	float posY;
 	float width;
@@ -33,7 +42,7 @@ struct FloraWidget {
 	FloraWidgetStyle style;
 	FloraLayout layout;
 	FloraWidget* parent;
-	FloraWidget* children;
+	FloraWidget** children;
 	int childCount;
 	int childCapacity;
 

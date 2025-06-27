@@ -173,7 +173,7 @@ bool addChildToWidget(FloraWidget* parent, FloraWidget* child) {
 	}
 
 	if (parent->children == NULL) {
-		parent->children = (FloraWidget*)malloc(INITIAL_CHILD_WIDGET_CAPACITY * sizeof(FloraWidget));
+		parent->children = (FloraWidget*)malloc(INITIAL_CHILD_WIDGET_CAPACITY * sizeof(FloraWidget*));
 		if (!parent->children) {
 			printf("Log: Failed to allocate memory for children. Aborting!\n");
 			fprintf(stderr, "Error: Failed to allocate memory for children.\n");
@@ -186,7 +186,7 @@ bool addChildToWidget(FloraWidget* parent, FloraWidget* child) {
 	if (parent->childCount + 1 > parent->childCapacity) {
 		int newCapacity = parent->childCapacity * GROWTH_FACTOR;
 		FloraWidget* newChildren = (FloraWidget*)realloc(
-			parent->children, newCapacity * sizeof(FloraWidget));
+			parent->children, newCapacity * sizeof(FloraWidget*));
 		if (!newChildren) {
 			printf("Log: Failed to allocate memory for new children. Aborting!\n");
 			fprintf(stderr, "Error: Failed to allocate memory for new children.\n");
@@ -197,15 +197,17 @@ bool addChildToWidget(FloraWidget* parent, FloraWidget* child) {
 		printf("Log: Resized child array to new capacity: %d\n", newCapacity);
 	}
 
-	parent->children[parent->childCount++] = *child;
+	parent->children[parent->childCount++] = child;
 	child->parent = parent;
 	printf("Log: Child widget added to parent. Total children: %d\n", parent->childCount);
 	return true;
 }
 
 void baseCreateScene(ApplicationState* state, FloraScene* scene) {
-	FloraWidget baseWidget = { .posX = 50,
-				.posY = 50 + 1 * 50,
+	FloraWidget baseWidget = {
+				.id = 1,
+				.posX = 100,
+				.posY = 100,
 				.width = 50,
 				.height = 50,
 				.isVisible = true,
@@ -217,11 +219,19 @@ void baseCreateScene(ApplicationState* state, FloraScene* scene) {
 				.onClick = baseWidgetOnClick,
 				.style = (FloraWidgetStyle){
 					.colour = (FloraColour){.r = 25, .g = 132, .b = 191, .a = 255 },
-					.borderColour = (FloraColour){.r = 255, .g = 255, .b = 255, .a = 255 }
+					.borderColour = (FloraColour){.r = 255, .g = 255, .b = 255, .a = 255 },
+					.padding = (FloraPadding){
+						.left = 20.0f,
+						.right = 20.0f,
+						.top = 10.0f,
+						.bottom = 10.0f
+					}
 				},
 		.layout = LEFT_TO_RIGHT
 	};
-	FloraWidget child1 = { .posX = 50,
+	FloraWidget child1 = { 
+				.id = 2,
+				.posX = 50,
 				.posY = 50,
 				.width = 125,
 				.height = 25,
@@ -238,7 +248,9 @@ void baseCreateScene(ApplicationState* state, FloraScene* scene) {
 				}
 	};
 
-	FloraWidget child2 = { .posX = 50,
+	FloraWidget child2 = {
+				.id = 3,
+				.posX = 50,
 				.posY = 50,
 				.width = 40,
 				.height = 60,
@@ -249,8 +261,53 @@ void baseCreateScene(ApplicationState* state, FloraScene* scene) {
 				.update = baseWidgetUpdate,
 				.render = baseWidgetRender,
 				.onClick = baseWidgetOnClick,
+				.layout = TOP_TO_BOTTOM,
 				.style = (FloraWidgetStyle){
 					.colour = (FloraColour){.r = 255, .g = 0, .b = 0, .a = 255 },
+					.borderColour = (FloraColour){.r = 255, .g = 255, .b = 255, .a = 255 },
+					.padding = (FloraPadding){
+						.left = 10.0f,
+						.right = 10.0f,
+						.top = 5.0f,
+						.bottom = 5.0f
+					}
+				}
+	};
+
+	FloraWidget child3 = {
+				.id = 4,
+				.posX = 50,
+				.posY = 50,
+				.width = 20,
+				.height = 30,
+				.isVisible = true,
+				.children = NULL,
+				.childCount = 0,
+				.parent = NULL,
+				.update = baseWidgetUpdate,
+				.render = baseWidgetRender,
+				.onClick = baseWidgetOnClick,
+				.style = (FloraWidgetStyle){
+					.colour = (FloraColour){.r = 255, .g = 123, .b = 196, .a = 255 },
+					.borderColour = (FloraColour){.r = 255, .g = 255, .b = 255, .a = 255 }
+				}
+	};
+
+	FloraWidget child4 = {
+				.id = 5,
+				.posX = 50,
+				.posY = 50,
+				.width = 90,
+				.height = 30,
+				.isVisible = true,
+				.children = NULL,
+				.childCount = 0,
+				.parent = NULL,
+				.update = baseWidgetUpdate,
+				.render = baseWidgetRender,
+				.onClick = baseWidgetOnClick,
+				.style = (FloraWidgetStyle){
+					.colour = (FloraColour){.r = 11, .g = 123, .b = 196, .a = 255 },
 					.borderColour = (FloraColour){.r = 255, .g = 255, .b = 255, .a = 255 }
 				}
 	};
@@ -278,8 +335,24 @@ void baseCreateScene(ApplicationState* state, FloraScene* scene) {
 		exit(1);
 	}
 
+	int child3Index = addWidgetToScene(scene, child3);
+	if (child3Index == -1) {
+		printf("Log: Failed to add child widget to scene.\n");
+		fprintf(stderr, "Error: Failed to add child widget to scene.\n");
+		exit(1);
+	}
+
+	int child4Index = addWidgetToScene(scene, child4);
+	if (child4Index == -1) {
+		printf("Log: Failed to add child widget to scene.\n");
+		fprintf(stderr, "Error: Failed to add child widget to scene.\n");
+		exit(1);
+	}
+
 	addChildToWidget(&scene->widgets[baseIndex], &scene->widgets[child1Index]);
 	addChildToWidget(&scene->widgets[baseIndex], &scene->widgets[child2Index]);
+	addChildToWidget(&scene->widgets[child2Index], &scene->widgets[child3Index]);
+	addChildToWidget(&scene->widgets[child2Index], &scene->widgets[child4Index]);
 }
 
 void initFloraScene(FloraScene* scene, ApplicationState* state) {

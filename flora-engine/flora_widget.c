@@ -3,20 +3,16 @@
 #include <stdio.h>
 
 void calculateWidgetWidthHeight(FloraWidget* widget) {
-	if (!widget || !widget->isVisible) {
-		return;
-	}
-	if (widget->childCount == 0) {
-		// If there are no children, the width and height are already set
+	if (!widget || !widget->isVisible || widget->childCount == 0) {
 		return;
 	}
 
-	float totalWidgetWidth = 0;
-	float totalWidgetHeight = 0;
+	float totalWidgetWidth = 0.0f;
+	float totalWidgetHeight = 0.0f;
 
 	if (widget->layout == LEFT_TO_RIGHT) {
 		for (int i = 0; i < widget->childCount; i++) {
-			FloraWidget* child = &widget->children[i];
+			FloraWidget* child = widget->children[i];
 			calculateWidgetWidthHeight(child);
 			if (child->isVisible) {
 				totalWidgetHeight = child->height > totalWidgetHeight ? child->height : totalWidgetHeight;
@@ -25,7 +21,7 @@ void calculateWidgetWidthHeight(FloraWidget* widget) {
 		}
 	} else if (widget->layout == TOP_TO_BOTTOM) {
 		for (int i = 0; i < widget->childCount; i++) {
-			FloraWidget* child = &widget->children[i];
+			FloraWidget* child = widget->children[i];
 			calculateWidgetWidthHeight(child);
 			if (child->isVisible) {
 				totalWidgetHeight += child->height;
@@ -33,8 +29,8 @@ void calculateWidgetWidthHeight(FloraWidget* widget) {
 			}
 		}
 	}
-	widget->width = totalWidgetWidth;
-	widget->height = totalWidgetHeight;
+	widget->width = totalWidgetWidth += widget->style.padding.left + widget->style.padding.right;
+	widget->height = totalWidgetHeight += widget->style.padding.top + widget->style.padding.bottom;;
 }
 
 void calculateChildrenPositions(FloraWidget* widget) {
@@ -42,27 +38,27 @@ void calculateChildrenPositions(FloraWidget* widget) {
 		return;
 	}
 
-	float offsetX = 0;
-	float offsetY = 0;
+	float offsetX = widget->style.padding.left;
+	float offsetY = widget->style.padding.top;
 	if (widget->layout == LEFT_TO_RIGHT) {
 		for (int i = 0; i < widget->childCount; i++) {
-			FloraWidget* child = &widget->children[i];
+			FloraWidget* child = widget->children[i];
 			if (!child->isVisible) {
 				continue; 
 			}
 			child->posX = widget->posX + offsetX;
-			child->posY = widget->posY;
+			child->posY = widget->posY + offsetY;
 			offsetX += child->width;
 
 			calculateChildrenPositions(child);
 		}
 	} else if (widget->layout == TOP_TO_BOTTOM) {
 		for (int i = 0; i < widget->childCount; i++) {
-			FloraWidget* child = &widget->children[i];
+			FloraWidget* child = widget->children[i];
 			if (!child->isVisible) {
 				continue; 
 			}
-			child->posX = widget->posX;
+			child->posX = widget->posX + offsetX;
 			child->posY = widget->posY + offsetY;
 			offsetY += child->height;
 			calculateChildrenPositions(child);
@@ -88,7 +84,7 @@ void renderWidget(FloraWidget* widget, ApplicationState* state) {
 
 	// Render children
 	for (int i = 0; i < widget->childCount; i++) {
-		FloraWidget* child = &widget->children[i];
+		FloraWidget* child = widget->children[i];
 		if (child->isVisible) {
 			renderWidget(child, state);
 		}
@@ -101,13 +97,7 @@ void renderWidget(FloraWidget* widget, ApplicationState* state) {
 */
 
 void baseWidgetRender(FloraWidget* widget, ApplicationState* state) {
-	// if the widget has a parent, do not render it. It's parent will render it
-	if (widget->parent) {
-		return;
-	}
-
-	// If the widget is not visible, do not render it
-	if (!widget || !widget->isVisible) {
+	if (!widget || !widget->isVisible || widget->childCount == 0) {
 		return;
 	}
 
@@ -118,14 +108,14 @@ void baseWidgetRender(FloraWidget* widget, ApplicationState* state) {
 }
 
 void baseWidgetUpdate(FloraWidget* widget, ApplicationState* state) {
-	 widget->posX += 30 * (float)state->deltaTime;
-	 if (widget->posX > state->windowWidth) {
-	 	widget->posX = 0;
-	 }
-	 widget->posY += 30 * (float)state->deltaTime;
-	 if (widget->posY > state->windowHeight) {
-	 	widget->posY = 0;
-	 }
+	 //widget->posX += 30 * (float)state->deltaTime;
+	 //if (widget->posX > state->windowWidth) {
+	 //	widget->posX = 0;
+	 //}
+	 //widget->posY += 30 * (float)state->deltaTime;
+	 //if (widget->posY > state->windowHeight) {
+	 //	widget->posY = 0;
+	 //}
 }
 
 void baseWidgetOnClick(FloraWidget* widget, ApplicationState* state,
