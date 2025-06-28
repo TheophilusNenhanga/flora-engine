@@ -19,6 +19,7 @@ void calculateWidgetWidthHeight(FloraWidget* widget) {
 				totalWidgetWidth += child->width;
 			}
 		}
+		totalWidgetWidth += (widget->childCount - 1) * widget->style.gap.x;
 	} else if (widget->layout == TOP_TO_BOTTOM) {
 		for (int i = 0; i < widget->childCount; i++) {
 			FloraWidget* child = widget->children[i];
@@ -28,9 +29,10 @@ void calculateWidgetWidthHeight(FloraWidget* widget) {
 				totalWidgetWidth = child->width > totalWidgetWidth ? child->width : totalWidgetWidth;
 			}
 		}
+		totalWidgetHeight += (widget->childCount - 1) * widget->style.gap.y;
 	}
 	widget->width = totalWidgetWidth += widget->style.padding.left + widget->style.padding.right;
-	widget->height = totalWidgetHeight += widget->style.padding.top + widget->style.padding.bottom;;
+	widget->height = totalWidgetHeight += widget->style.padding.top + widget->style.padding.bottom;
 }
 
 void calculateChildrenPositions(FloraWidget* widget) {
@@ -48,7 +50,7 @@ void calculateChildrenPositions(FloraWidget* widget) {
 			}
 			child->posX = widget->posX + offsetX;
 			child->posY = widget->posY + offsetY;
-			offsetX += child->width;
+			offsetX += child->width + widget->style.gap.x;
 
 			calculateChildrenPositions(child);
 		}
@@ -60,7 +62,7 @@ void calculateChildrenPositions(FloraWidget* widget) {
 			}
 			child->posX = widget->posX + offsetX;
 			child->posY = widget->posY + offsetY;
-			offsetY += child->height;
+			offsetY += child->height + widget->style.gap.y;
 			calculateChildrenPositions(child);
 		}
 	}

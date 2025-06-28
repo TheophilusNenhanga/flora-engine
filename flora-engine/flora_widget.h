@@ -21,9 +21,15 @@ typedef struct {
 } FloraPadding;
 
 typedef struct {
+	float x;
+	float y;
+} FloraGap;
+
+typedef struct {
 	FloraColour colour;
 	FloraColour borderColour;
 	FloraPadding padding;
+	FloraGap gap;
 } FloraWidgetStyle;
 
 typedef enum {

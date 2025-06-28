@@ -182,7 +182,7 @@ bool addChildToWidget(FloraWidget* parent, FloraWidget* child) {
 		parent->childCapacity = INITIAL_CHILD_WIDGET_CAPACITY;
 		printf("Log: Initialized child array with capacity: %d\n", parent->childCapacity);
 	}
-	
+
 	if (parent->childCount + 1 > parent->childCapacity) {
 		int newCapacity = parent->childCapacity * GROWTH_FACTOR;
 		FloraWidget* newChildren = (FloraWidget*)realloc(
@@ -225,11 +225,12 @@ void baseCreateScene(ApplicationState* state, FloraScene* scene) {
 						.right = 20.0f,
 						.top = 10.0f,
 						.bottom = 10.0f
-					}
+					},
+		.gap = (FloraGap){.x = 25 }
 				},
 		.layout = LEFT_TO_RIGHT
 	};
-	FloraWidget child1 = { 
+	FloraWidget child1 = {
 				.id = 2,
 				.posX = 50,
 				.posY = 50,
@@ -270,7 +271,8 @@ void baseCreateScene(ApplicationState* state, FloraScene* scene) {
 						.right = 10.0f,
 						.top = 5.0f,
 						.bottom = 5.0f
-					}
+					},
+					.gap = (FloraGap){.y = 50 }
 				}
 	};
 
