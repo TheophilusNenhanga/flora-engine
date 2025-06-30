@@ -47,6 +47,9 @@
     <ClInclude Include="flora_constants.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="flora_colours.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="readme.md" />
