@@ -53,7 +53,7 @@ bool cleanupApplicationState(ApplicationState *appState) {
     fprintf(stderr, "Error: Failed to clean up event queue.\n");
     return false;
   }
-  printf("Log: Game state cleaned up successfully.\n");
+  printf("Log: Application state cleaned up successfully.\n");
   return true;
 }
 
