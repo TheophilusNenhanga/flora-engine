@@ -59,7 +59,7 @@ void updateScene(SceneManager* manager) {
 		for (int i = 0; i < scene->widgetCount; i++) {
 			FloraWidget* widget = &scene->widgets[i];
 			if (widget->isVisible) {
-				widget->update(widget, manager->state);
+				widget->update(widget, (struct ApplicationState*) manager->state);
 			}
 		}
 
@@ -77,7 +77,7 @@ void updateScene(SceneManager* manager) {
 								if (widget->isVisible && widget->onClick &&
 									widgetContainsPoint(widget, event->as.mouseButton.x,
 														event->as.mouseButton.y)) {
-									widget->onClick(widget, manager->state, &event->as.mouseButton);
+									widget->onClick(widget, (struct ApplicationState*) manager->state, &event->as.mouseButton);
 									break; // Stop after the first widget that handles the click
 								}
 							}
@@ -137,7 +137,7 @@ void renderScene(SceneManager* manager) {
 		for (int i = 0; i < scene->widgetCount; i++) {
 			FloraWidget* widget = &scene->widgets[i];
 			if (widget->isVisible) {
-				widget->render(widget, manager->state);
+				widget->render(widget, (struct ApplicationState*)manager->state);
 			}
 		}
 	}
@@ -253,7 +253,6 @@ void baseCreateScene(ApplicationState* state, FloraScene* scene) {
 
 	FloraWidget child2 = {
 				.id = 3,
-				.position = (FloraPosition){.x = 50, .y = 50},
 				.sizing = (FloraSizing){
 					.width = FLORA_WIDTH_GROW(100),
 					.height = FLORA_HEIGHT_FIT(100)

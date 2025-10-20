@@ -1,6 +1,5 @@
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <stdbool.h>
-#include <stdio.h>
 
 #include "app_state.h"
 #include "flora_constants.h"
@@ -15,7 +14,7 @@ void render(ApplicationState *state) {
 
 void applicationLoop(ApplicationState *state, SceneManager *sceneManager) {
   while (state->running) {
-    uint64_t frameStart = SDL_GetTicks();
+    const uint64_t frameStart = SDL_GetTicks();
 
     getInput(state);
     updateScene(sceneManager);
@@ -24,7 +23,7 @@ void applicationLoop(ApplicationState *state, SceneManager *sceneManager) {
     renderScene(sceneManager);
     SDL_RenderPresent(state->mainRenderer);
 
-    uint64_t frameEnd = SDL_GetTicks();
+    const uint64_t frameEnd = SDL_GetTicks();
 
     state->deltaTime = (frameEnd - frameStart) / 1000.0f;
     state->lastFrameTime = frameEnd;
@@ -32,6 +31,8 @@ void applicationLoop(ApplicationState *state, SceneManager *sceneManager) {
 }
 
 int main(int argc, char *args[]) {
+  (void) args;
+  (void) argc;
   SceneManager sceneManager = {NULL, NULL};
   EventQueue eventQueue = {NULL, 0, 0};
 

@@ -1,7 +1,7 @@
 #ifndef FLORA_WIDGET_H
 #define FLORA_WIDGET_H
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <stdbool.h>
 
 #include "flora_colours.h"

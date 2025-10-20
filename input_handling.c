@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "input_handling.h"
 
 static FloraEvent* newFloraEvent( SDL_Event* sdlEvent) {

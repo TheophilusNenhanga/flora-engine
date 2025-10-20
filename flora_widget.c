@@ -1,6 +1,5 @@
 #include "flora_widget.h"
 #include "app_state.h"
-#include <stdio.h>
 
 void calculateWidgetWidthHeight(FloraWidget* widget) {
 	if (!widget || !widget->isVisible || widget->childCount == 0) {
@@ -200,28 +199,27 @@ void renderWidget(FloraWidget* widget, ApplicationState* state) {
 * 2. The size of an element is dependent on the size of its children.
 */
 
-void baseWidgetRender(FloraWidget* widget, ApplicationState* state) {
+void baseWidgetRender(FloraWidget* widget, struct ApplicationState* state){
 	if (!widget || !widget->isVisible || widget->childCount == 0) {
 		return;
 	}
 
-
 	calculateWidgetWidthHeight(widget);
 	calculateGrowSizing(widget);
 	calculateChildrenPositions(widget);
-	renderWidget(widget, state);
+	renderWidget(widget, (ApplicationState*)state);
 }
 
-void baseWidgetUpdate(FloraWidget* widget, ApplicationState* state) {
+void baseWidgetUpdate(FloraWidget* widget, struct ApplicationState* state) {
 
 }
 
-void baseWidgetOnClick(FloraWidget* widget, ApplicationState* state,
+void baseWidgetOnClick(FloraWidget* widget, struct ApplicationState* state,
 					   SDL_MouseButtonEvent* event) {
 
 }
 
-bool widgetContainsPoint(FloraWidget* widget, float x, float y) {
+bool widgetContainsPoint(FloraWidget* widget, const float x, const float y) {
 	if (!widget || !widget->isVisible)
 		return false;
 	return (x >= widget->position.x && x <= widget->position.x + widget->sizing.width.value &&

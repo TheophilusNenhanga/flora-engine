@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 3.31)
+set(CMAKE_C_COMPILER gcc)
+
+project(flora-engine C)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+#TODO: Change this depending on your system
+set(SDL3_DIR "C:/libs/SDL3/x86_64-w64-mingw32/lib/cmake/SDL3")
+find_package(SDL3 REQUIRED CONFIG)
+
+set(SOURCES
+        "app_state.c"
+        "flora_widget.c"
+        "input_handling.c"
+        "main.c"
+        "scene.c"
+)
+
+add_executable(flora-engine WIN32 ${SOURCES})
+
+target_link_libraries(flora-engine PRIVATE SDL3::SDL3)
