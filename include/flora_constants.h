@@ -7,5 +7,6 @@
 #define INITIAL_WIDGET_CAPACITY 8
 #define GROWTH_FACTOR 2
 #define INITIAL_CHILD_WIDGET_CAPACITY 4
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 #endif // !FLORA_CONSTANTS_H
