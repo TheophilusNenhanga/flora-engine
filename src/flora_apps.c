@@ -6,6 +6,7 @@
 #include "SDL3/SDL_init.h"
 #include "flora_constants.h"
 #include "flora_events.h"
+#include "flora_fonts.h"
 #include "flora_screens.h"
 
 bool create_window(FloraApplicationState* state, const char* title) {
@@ -66,11 +67,20 @@ bool init_application(FloraApplicationState* state, const char* title, int width
     }
     if (!init_flora_screen(state->current_screen, state)) {
         fprintf(stderr, "Error: Failed to initialize current screen\n");
-        return FLORA_ENGINE_FATAL;
+        return false;
     }
     if (!init_event_queue(&state->event_queue, 64)) {
         fprintf(stderr, "Error: Failed to initialize event queue\n");
-        return FLORA_ENGINE_FATAL;
+        return false;
+    }
+
+    if (!init_fonts()) {
+        return false;
+    }
+
+    if (!add_font(state, OPEN_SANS_FONT_PATH, 24)) {
+        fprintf(stderr, "Error: Failed to add font\n");
+        return false;
     }
 
     if (state->current_screen->on_screen_create) {
@@ -90,6 +100,15 @@ bool destroy_application(FloraApplicationState* state) {
         fprintf(stderr, "Error: Failed to destroy event queue\n");
         return false;
     }
+
+    for (int i = 0; i < state->font_count; i++) {
+        if (state->fonts[i]) {
+            TTF_CloseFont(state->fonts[i]);
+        }
+    }
+    state->fonts = NULL;
+    destroy_fonts();
+
     printf("Log: Application state destroyed successfully\n");
     return true;
 }

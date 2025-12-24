@@ -2,12 +2,19 @@
 #define FLORA_APPS_H
 
 #include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <stdint.h>
+
 #include "flora_widgets.h"
 
 struct FloraApplicationState{
     SDL_Window* window;
     SDL_Renderer* renderer;
+
+    TTF_Font** fonts;
+    int font_count;
+    int font_capacity;
+
     uint64_t last_frame_time;
     double delta_time;
     int window_width;

@@ -8,5 +8,7 @@
 #define GROWTH_FACTOR 2
 #define INITIAL_CHILD_WIDGET_CAPACITY 4
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define OPEN_SANS_FONT_PATH "D:\\flora-engine\\assets\\fonts\\Open_Sans\\OpenSans-VariableFont_wdth,wght.ttf"
 
 #endif // !FLORA_CONSTANTS_H

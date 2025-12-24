@@ -5,6 +5,11 @@
 #include "flora_colours.h"
 #include "flora_events.h"
 
+typedef enum {
+    FLORA_BOX,
+    FLORA_TEXT
+} FloraWidgetType;
+
 typedef struct {
     float left;
     float right;
@@ -58,6 +63,7 @@ typedef void (*widget_on_mouse_down)(FloraWidget* widget, FloraApplicationState*
 
 struct FloraWidget {
     int id;
+    FloraWidgetType type;
     FloraPosition position;
     FloraWidgetStyle style;
     FloraSizing sizing;
@@ -70,6 +76,20 @@ struct FloraWidget {
     widget_update update;
     widget_render render;
     widget_on_mouse_down on_mouse_down;
+
+    union {
+        struct {
+
+        }box;
+        struct {
+            int font_index;
+            int font_size;
+            FloraColour font_colour;
+            FloraColour font_background;
+            char* content;
+        }text;
+    }as;
+
 };
 
 #define FLORA_WIDTH(sizing_type, width) \
