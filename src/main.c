@@ -7,8 +7,8 @@
 #include "flora_events.h"
 #include "flora_screens.h"
 
-void application_loop(FloraApplicationState* state) {
-    FloraScreen* screen = state->current_screen;
+void application_loop(FloraApplicationState *state) {
+    FloraScreen *screen = state->current_screen;
     while (state->running) {
         const uint64_t frame_start = SDL_GetTicks();
         get_input(state);
@@ -21,18 +21,19 @@ void application_loop(FloraApplicationState* state) {
         const uint64_t frame_end = SDL_GetTicks();
 
         state->delta_time = (frame_end - frame_start) / 1000.0f;
+        printf("Frames per second (FPS) = %f\n", 1 / state->delta_time);
         state->last_frame_time = frame_end;
     }
 }
 
-int main(const int argc, char** argv) {
+int main(const int argc, char **argv) {
     int width = 800;
     int height = 600;
-    char* title = "Flora Engine";
+    char *title = "Flora Engine";
     if (argc < 4) {
         printf("Alternate Usage: %s <width> <height> <title>\n", argv[0]);
         printf("Using: %s %d %d %s\n", argv[0], width, height, "Flora Engine");
-    }else {
+    } else {
         width = strtol(argv[1], NULL, 10);
         height = strtol(argv[2], NULL, 10);
         title = argv[3];
