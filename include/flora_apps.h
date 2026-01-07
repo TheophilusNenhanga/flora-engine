@@ -30,6 +30,10 @@ struct FloraScreen {
     FloraWidget* widgets;
     int widget_count;
     int widget_capacity;
+    // TODO: Allow for multiple screens
+    // int screen_id
+    // char* screen_name
+    // int screen_name_length
     // FloraScreen* next_screen;
 };
 

@@ -74,7 +74,7 @@ bool init_application(FloraApplicationState* state, const char* title, int width
         return false;
     }
 
-    if (!init_fonts()) {
+    if (!init_fonts(state)) {
         return false;
     }
 
@@ -92,6 +92,8 @@ bool init_application(FloraApplicationState* state, const char* title, int width
 }
 
 bool destroy_application(FloraApplicationState* state) {
+    destroy_fonts(state);
+
     if (!destroy_window(state)) {
         fprintf(stderr, "Error: Failed to destroy window\n");
         return false;
@@ -100,15 +102,6 @@ bool destroy_application(FloraApplicationState* state) {
         fprintf(stderr, "Error: Failed to destroy event queue\n");
         return false;
     }
-
-    for (int i = 0; i < state->font_count; i++) {
-        if (state->fonts[i]) {
-            TTF_CloseFont(state->fonts[i]);
-        }
-    }
-    state->fonts = NULL;
-    destroy_fonts();
-
     printf("Log: Application state destroyed successfully\n");
     return true;
 }
