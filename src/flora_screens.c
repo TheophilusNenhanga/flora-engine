@@ -3,6 +3,7 @@
 
 #include "flora_screens.h"
 #include "flora_constants.h"
+#include "flora_fonts.h"
 
 void base_screen_destroy(FloraApplicationState *state, FloraScreen *screen) {
     if (!screen) {
@@ -47,7 +48,8 @@ void update_screen(FloraScreen *screen, FloraApplicationState *state) {
                     for (int i = 0; i < screen->widget_count; i++) {
                         FloraWidget *widget = &screen->widgets[i];
                         if (widget->is_visible && widget->callbacks.on_mouse_down
-                            && widget_contains_point(widget, event->as.mouse_button.x, event->as.mouse_button.y)) {
+                            && widget_contains_point(widget, (int) event->as.mouse_button.x,
+                                                     (int) event->as.mouse_button.y)) {
                             widget->callbacks.on_mouse_down(widget, state);
                             // TODO: How should event propagation be handled
                             break; // Stop after the first widget handles the event
@@ -269,6 +271,19 @@ void base_screen_create(FloraApplicationState *state, FloraScreen *screen) {
     add_child_widget(baseWidget, child2);
     add_child_widget(child2, child3);
     add_child_widget(child2, child4);
+
+    TTF_Font *font = add_font(state, OPEN_SANS_FONT_PATH, 24);
+
+    FloraWidget *child5 = create_text_widget(state, child1,
+                                             (FloraWidgetStyle){
+                                                 .position = (FloraPosition){.x = 50, .y = 50},
+                                                 .sizing = {
+                                                     .width = FLORA_WIDTH_FIXED(40), .height = FLORA_HEIGHT_FIXED(24)
+                                                 },
+                                                 .text_colour = FLORA_WHITE, .font_size = 24
+                                             }, (FloraWidgetCallbacks){.render = base_text_widget_render}, true,
+                                             "Hello World.", 13, font);
+    add_child_widget(child1, child5);
 }
 
 
@@ -278,7 +293,7 @@ bool init_flora_screen(FloraScreen *screen, FloraApplicationState *state) {
     screen->widget_count = 0;
     screen->widget_capacity = INITIAL_WIDGET_CAPACITY;
     screen->widgets =
-            (FloraWidget *) malloc(screen->widget_capacity * sizeof(FloraWidget));
+            (FloraWidget *) calloc(screen->widget_capacity, sizeof(FloraWidget));
     if (!screen->widgets) {
         printf("Log: Failed to allocate memory for scene widgets. Aborting!\n");
         fprintf(stderr, "Error: Failed to allocate memory for scene widgets.\n");

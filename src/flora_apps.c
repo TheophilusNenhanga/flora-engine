@@ -4,7 +4,6 @@
 
 #include "flora_apps.h"
 #include "SDL3/SDL_init.h"
-#include "flora_constants.h"
 #include "flora_events.h"
 #include "flora_fonts.h"
 #include "flora_screens.h"
@@ -74,12 +73,7 @@ bool init_application(FloraApplicationState *state, const char *title, int width
         return false;
     }
 
-    if (!init_fonts(state)) {
-        return false;
-    }
-
-    if (!add_font(state, OPEN_SANS_FONT_PATH, 24)) {
-        fprintf(stderr, "Error: Failed to add font\n");
+    if (!init_fonts()) {
         return false;
     }
 

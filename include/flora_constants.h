@@ -12,6 +12,7 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define RAND(a, b) ((a) + rand() % ((b) - (a) + 1))
+// TODO: Change this and all occurrences
 #define OPEN_SANS_FONT_PATH "D:\\flora-engine\\assets\\fonts\\Open_Sans\\OpenSans-VariableFont_wdth,wght.ttf"
 
 #endif // !FLORA_CONSTANTS_H

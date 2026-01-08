@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "flora_colours.h"
 #include "flora_events.h"
+#include "flora_fonts.h"
 
 typedef enum {
     FLORA_BOX,
@@ -50,6 +51,8 @@ typedef struct {
 } FloraPosition;
 
 typedef struct {
+    FloraColour text_colour; // is not used if not a text widget
+    int font_size;
     FloraColour inner_colour;
     FloraColour border_colour;
     FloraPadding padding;
@@ -93,13 +96,11 @@ struct FloraWidget {
         } box;
 
         struct {
-            int font_index;
-            int font_size;
-            FloraColour font_colour;
-            FloraColour font_background;
+            TTF_Font *font;
+            int length;
             char *content;
-            int length; // length of the content
             SDL_Surface *surface;
+            SDL_Texture *texture;
         } text;
     } as;
 };
@@ -139,9 +140,15 @@ void base_box_widget_update(FloraWidget *widget, FloraApplicationState *state);
 
 void base_box_widget_on_mouse_down(FloraWidget *widget, FloraApplicationState *state);
 
+void base_text_widget_render(FloraWidget *widget, FloraApplicationState *state);
+
 FloraWidget *create_box_widget(FloraApplicationState *state, FloraWidget *parent,
                                FloraWidgetStyle style, FloraWidgetCallbacks callbacks,
                                bool is_visible);
+
+FloraWidget *create_text_widget(FloraApplicationState *state, FloraWidget *parent, FloraWidgetStyle style,
+                                FloraWidgetCallbacks callbacks, bool is_visible, char *text,
+                                int length, TTF_Font *font);
 
 bool add_child_widget(FloraWidget *widget, FloraWidget *child);
 

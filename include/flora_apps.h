@@ -7,13 +7,12 @@
 
 #include "flora_widgets.h"
 
-struct FloraApplicationState{
-    SDL_Window* window;
-    SDL_Renderer* renderer;
+struct FloraApplicationState {
+    SDL_Window *window;
+    SDL_Renderer *renderer;
 
-    TTF_Font** fonts;
-    int font_count;
-    int font_capacity;
+    TTF_Font *font;
+    float font_size;
 
     uint64_t last_frame_time;
     double delta_time;
@@ -21,13 +20,15 @@ struct FloraApplicationState{
     int window_height;
     bool running;
     EventQueue event_queue;
-    FloraScreen* current_screen;
+    FloraScreen *current_screen;
 };
 
 struct FloraScreen {
-    void (*on_screen_create)(FloraApplicationState* state, FloraScreen* screen);
-    void (*on_screen_destroy)(FloraApplicationState* state, FloraScreen* screen);
-    FloraWidget* widgets;
+    void (*on_screen_create)(FloraApplicationState *state, FloraScreen *screen);
+
+    void (*on_screen_destroy)(FloraApplicationState *state, FloraScreen *screen);
+
+    FloraWidget *widgets;
     int widget_count;
     int widget_capacity;
     // TODO: Allow for multiple screens
@@ -38,10 +39,12 @@ struct FloraScreen {
 };
 
 
-bool init_application(FloraApplicationState* state, const char* title, int width, int height);
-bool destroy_application(FloraApplicationState* state);
+bool init_application(FloraApplicationState *state, const char *title, int width, int height);
 
-bool create_window(FloraApplicationState* state, const char* title);
-bool destroy_window(FloraApplicationState* state);
+bool destroy_application(FloraApplicationState *state);
+
+bool create_window(FloraApplicationState *state, const char *title);
+
+bool destroy_window(FloraApplicationState *state);
 
 #endif //FLORA_APPS_H
