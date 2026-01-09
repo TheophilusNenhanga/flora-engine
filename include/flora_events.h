@@ -7,7 +7,7 @@
 typedef struct FloraApplicationState FloraApplicationState;
 typedef struct FloraScreen FloraScreen;
 
-void get_input(FloraApplicationState* state);
+void get_input(FloraApplicationState *state);
 
 typedef enum {
     FLORA_MOUSE_MOVE,
@@ -21,6 +21,7 @@ typedef enum {
 
 typedef struct {
     FloraEventType type;
+
     union {
         SDL_MouseMotionEvent mouse_motion;
         SDL_MouseButtonEvent mouse_button;
@@ -30,18 +31,22 @@ typedef struct {
 } FloraEvent;
 
 typedef struct {
-    FloraEvent** events;
+    FloraEvent **events;
     int back;
     int front;
     int capacity;
-}EventQueue;
+} EventQueue;
 
-bool init_event_queue(EventQueue* queue, int capacity);
-bool destroy_event_queue(EventQueue* queue);
-bool enqueue_event(EventQueue* queue, FloraEvent* event);
-bool dequeue_event(EventQueue* queue, FloraEvent** event);
-bool is_event_queue_empty(EventQueue* queue);
+bool init_event_queue(EventQueue *queue, int capacity);
 
-bool destroy_event(FloraEvent* event);
+bool destroy_event_queue(EventQueue *queue);
+
+bool enqueue_event(EventQueue *queue, FloraEvent *event);
+
+bool dequeue_event(EventQueue *queue, FloraEvent **event);
+
+bool is_event_queue_empty(EventQueue *queue);
+
+bool destroy_event(FloraEvent *event);
 
 #endif //FLORA_EVENTS_H

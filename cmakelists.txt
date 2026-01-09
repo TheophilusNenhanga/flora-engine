@@ -9,7 +9,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #TODO: Change this depending on your system
 set(SDL3_DIR "C:/libs/SDL3/x86_64-w64-mingw32/lib/cmake/SDL3")
+set(SDL3_ttf_DIR "C:/libs/SDL3_TTF/x86_64-w64-mingw32/lib/cmake/SDL3_ttf")
 find_package(SDL3 REQUIRED CONFIG)
+find_package(SDL3_ttf REQUIRED CONFIG)
 
 set(SOURCES
     "src/flora_events.c"
@@ -25,3 +27,4 @@ add_executable(flora-engine WIN32 ${SOURCES})
 target_include_directories(flora-engine PRIVATE "include")
 
 target_link_libraries(flora-engine PRIVATE SDL3::SDL3)
+target_link_libraries(flora-engine PRIVATE SDL3_ttf::SDL3_ttf)

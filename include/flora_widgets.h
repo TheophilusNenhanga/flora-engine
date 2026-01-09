@@ -4,6 +4,12 @@
 #include <stdbool.h>
 #include "flora_colours.h"
 #include "flora_events.h"
+#include "flora_fonts.h"
+
+typedef enum {
+    FLORA_BOX,
+    FLORA_TEXT
+} FloraWidgetType;
 
 typedef struct {
     float left;
@@ -17,12 +23,6 @@ typedef struct {
     float y;
 } FloraGap;
 
-typedef struct {
-    FloraColour inner_colour;
-    FloraColour border_colour;
-    FloraPadding padding;
-    FloraGap gap;
-}FloraWidgetStyle;
 
 typedef enum {
     LEFT_TO_RIGHT,
@@ -50,26 +50,59 @@ typedef struct {
     float y;
 } FloraPosition;
 
+typedef struct {
+    FloraColour text_colour; // is not used if not a text widget
+    int font_size;
+    FloraColour inner_colour;
+    FloraColour border_colour;
+    FloraPadding padding;
+    FloraGap gap;
+    FloraLayoutDirection layout_direction;
+    FloraSizing sizing;
+    FloraPosition position;
+} FloraWidgetStyle;
+
+
 typedef struct FloraWidget FloraWidget;
 
-typedef void (*widget_update)(FloraWidget* widget, FloraApplicationState* state);
-typedef void (*widget_render)(FloraWidget* widget, FloraApplicationState* state);
-typedef void (*widget_on_mouse_down)(FloraWidget* widget, FloraApplicationState* state);
+typedef void (*widget_update)(FloraWidget *widget, FloraApplicationState *state);
 
-struct FloraWidget {
-    int id;
-    FloraPosition position;
-    FloraWidgetStyle style;
-    FloraSizing sizing;
-    FloraWidget* parent;
-    FloraWidget** children;
-    FloraLayoutDirection layout_direction;
-    int child_count;
-    int child_capacity;
-    bool is_visible;
+typedef void (*widget_render)(FloraWidget *widget, FloraApplicationState *state);
+
+typedef void (*widget_on_mouse_down)(FloraWidget *widget, FloraApplicationState *state);
+
+typedef void (*widget_on_destroy)(FloraWidget *widget, FloraApplicationState *state);
+
+typedef struct {
     widget_update update;
     widget_render render;
     widget_on_mouse_down on_mouse_down;
+    widget_on_destroy on_destroy;
+} FloraWidgetCallbacks;
+
+struct FloraWidget {
+    int id;
+    FloraWidgetType type;
+    FloraWidget *parent;
+    FloraWidget **children;
+    FloraWidgetStyle style;
+    FloraWidgetCallbacks callbacks;
+    int child_count;
+    int child_capacity;
+    bool is_visible;
+
+    union {
+        struct {
+        } box;
+
+        struct {
+            TTF_Font *font;
+            int length;
+            char *content;
+            SDL_Surface *surface;
+            SDL_Texture *texture;
+        } text;
+    } as;
 };
 
 #define FLORA_WIDTH(sizing_type, width) \
@@ -97,12 +130,26 @@ FLORA_WIDTH(FIXED, value)
 FLORA_WIDTH(GROW, value)
 
 
-bool destroy_flora_widget(FloraWidget* widget);
+bool destroy_flora_widget(FloraWidget *widget);
 
-bool widget_contains_point(FloraWidget* widget, int x, int y);
+bool widget_contains_point(FloraWidget *widget, int x, int y);
 
-void base_widget_render(FloraWidget* widget, FloraApplicationState* state);
-void base_widget_update(FloraWidget* widget, FloraApplicationState* state);
-void base_widget_on_mouse_down(FloraWidget* widget, FloraApplicationState* state);
+void base_box_widget_render(FloraWidget *widget, FloraApplicationState *state);
+
+void base_box_widget_update(FloraWidget *widget, FloraApplicationState *state);
+
+void base_box_widget_on_mouse_down(FloraWidget *widget, FloraApplicationState *state);
+
+void base_text_widget_render(FloraWidget *widget, FloraApplicationState *state);
+
+FloraWidget *create_box_widget(FloraApplicationState *state, FloraWidget *parent,
+                               FloraWidgetStyle style, FloraWidgetCallbacks callbacks,
+                               bool is_visible);
+
+FloraWidget *create_text_widget(FloraApplicationState *state, FloraWidget *parent, FloraWidgetStyle style,
+                                FloraWidgetCallbacks callbacks, bool is_visible, char *text,
+                                int length, TTF_Font *font);
+
+bool add_child_widget(FloraWidget *widget, FloraWidget *child);
 
 #endif //FLORA_WIDGETS_H

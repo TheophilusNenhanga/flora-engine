@@ -4,11 +4,11 @@
 
 #include "flora_apps.h"
 #include "SDL3/SDL_init.h"
-#include "flora_constants.h"
 #include "flora_events.h"
+#include "flora_fonts.h"
 #include "flora_screens.h"
 
-bool create_window(FloraApplicationState* state, const char* title) {
+bool create_window(FloraApplicationState *state, const char *title) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         fprintf(stderr, "Failed to initialize SDL: %s\n", SDL_GetError());
         return false;
@@ -30,7 +30,7 @@ bool create_window(FloraApplicationState* state, const char* title) {
     return true;
 }
 
-bool destroy_window(FloraApplicationState* state) {
+bool destroy_window(FloraApplicationState *state) {
     if (!state->window) {
         fprintf(stderr, "Error: Window is not initialized\n");
         return false;
@@ -50,7 +50,7 @@ bool destroy_window(FloraApplicationState* state) {
     return true;
 }
 
-bool init_application(FloraApplicationState* state, const char* title, int width, int height) {
+bool init_application(FloraApplicationState *state, const char *title, int width, int height) {
     state->window_width = width;
     state->window_height = height;
     if (!create_window(state, title)) {
@@ -66,11 +66,15 @@ bool init_application(FloraApplicationState* state, const char* title, int width
     }
     if (!init_flora_screen(state->current_screen, state)) {
         fprintf(stderr, "Error: Failed to initialize current screen\n");
-        return FLORA_ENGINE_FATAL;
+        return false;
     }
     if (!init_event_queue(&state->event_queue, 64)) {
         fprintf(stderr, "Error: Failed to initialize event queue\n");
-        return FLORA_ENGINE_FATAL;
+        return false;
+    }
+
+    if (!init_fonts()) {
+        return false;
     }
 
     if (state->current_screen->on_screen_create) {
@@ -81,7 +85,9 @@ bool init_application(FloraApplicationState* state, const char* title, int width
     return true;
 }
 
-bool destroy_application(FloraApplicationState* state) {
+bool destroy_application(FloraApplicationState *state) {
+    destroy_fonts(state);
+
     if (!destroy_window(state)) {
         fprintf(stderr, "Error: Failed to destroy window\n");
         return false;

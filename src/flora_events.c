@@ -5,12 +5,12 @@
 #include "flora_apps.h"
 #include "flora_constants.h"
 
-bool init_event_queue(EventQueue* queue, int capacity) {
+bool init_event_queue(EventQueue *queue, int capacity) {
     if (!queue) {
         fprintf(stderr, "Error: Event queue is not initialized\n");
         return false;
     }
-    queue->events = (FloraEvent**)malloc(capacity * sizeof(FloraEvent*));
+    queue->events = (FloraEvent **) malloc(capacity * sizeof(FloraEvent *));
     if (!queue->events) {
         fprintf(stderr, "Error: Failed to allocate memory for event queue\n");
         return false;
@@ -22,13 +22,13 @@ bool init_event_queue(EventQueue* queue, int capacity) {
     return true;
 }
 
-bool destroy_event_queue(EventQueue *queue){
-    if  (!queue) {
+bool destroy_event_queue(EventQueue *queue) {
+    if (!queue) {
         fprintf(stderr, "Error: Event queue is not initialized\n");
         return false;
     }
     int i = queue->front;
-    while(i != queue->back && queue->events != NULL) {
+    while (i != queue->back && queue->events != NULL) {
         free(queue->events[i]);
         i = (i + 1) % queue->capacity;
     }
@@ -52,7 +52,7 @@ bool enqueue_event(EventQueue *queue, FloraEvent *event) {
 
     if (next_back == queue->front) {
         int new_capacity = queue->capacity * GROWTH_FACTOR;
-        FloraEvent** new_events = (FloraEvent**)malloc(new_capacity * sizeof(FloraEvent*));
+        FloraEvent **new_events = (FloraEvent **) malloc(new_capacity * sizeof(FloraEvent *));
         if (!new_events) {
             fprintf(stderr, "Error: Failed to allocate memory for new event queue\n");
             return false;
@@ -109,8 +109,8 @@ bool destroy_event(FloraEvent *event) {
     return true;
 }
 
-static FloraEvent* new_flora_event(SDL_Event* sdl_event) {
-    FloraEvent* event = malloc(sizeof(FloraEvent));
+static FloraEvent *new_flora_event(SDL_Event *sdl_event) {
+    FloraEvent *event = malloc(sizeof(FloraEvent));
     if (!event) {
         fprintf(stderr, "Error: Failed to allocate memory for FloraEvent\n");
         return NULL;
@@ -161,42 +161,42 @@ static FloraEvent* new_flora_event(SDL_Event* sdl_event) {
     return event;
 }
 
-void get_input(FloraApplicationState* state) {
+void get_input(FloraApplicationState *state) {
     SDL_Event sdl_event;
 
     while (SDL_PollEvent(&sdl_event)) {
         switch (sdl_event.type) {
             case SDL_EVENT_QUIT: {
-                FloraEvent* event = new_flora_event(&sdl_event);
+                FloraEvent *event = new_flora_event(&sdl_event);
                 enqueue_event(&state->event_queue, event);
                 break;
             }
             case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-                FloraEvent* event = new_flora_event(&sdl_event);
+                FloraEvent *event = new_flora_event(&sdl_event);
                 enqueue_event(&state->event_queue, event);
                 break;
             }
             case SDL_EVENT_MOUSE_BUTTON_UP: {
-                FloraEvent* event = new_flora_event(&sdl_event);
+                FloraEvent *event = new_flora_event(&sdl_event);
                 enqueue_event(&state->event_queue, event);
                 break;
             }
             case SDL_EVENT_MOUSE_MOTION: {
-                FloraEvent* event = new_flora_event(&sdl_event);
+                FloraEvent *event = new_flora_event(&sdl_event);
                 enqueue_event(&state->event_queue, event);
                 break;
             }
             case SDL_EVENT_KEY_DOWN: {
-                FloraEvent* event = new_flora_event(&sdl_event);
+                FloraEvent *event = new_flora_event(&sdl_event);
                 enqueue_event(&state->event_queue, event);
                 break;
             }
             case SDL_EVENT_KEY_UP: {
-                FloraEvent* event = new_flora_event(&sdl_event);
+                FloraEvent *event = new_flora_event(&sdl_event);
                 enqueue_event(&state->event_queue, event);
                 break;
             }
-            default: {break;}
+            default: { break; }
         }
     }
 }
