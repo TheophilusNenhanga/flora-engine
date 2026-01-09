@@ -25,10 +25,9 @@ struct FloraApplicationState {
 
 struct FloraScreen {
     void (*on_screen_create)(FloraApplicationState *state, FloraScreen *screen);
-
     void (*on_screen_destroy)(FloraApplicationState *state, FloraScreen *screen);
 
-    FloraWidget *widgets;
+    FloraWidget **widgets;
     int widget_count;
     int widget_capacity;
     // TODO: Allow for multiple screens

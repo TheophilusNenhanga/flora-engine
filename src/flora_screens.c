@@ -12,7 +12,7 @@ void base_screen_destroy(FloraApplicationState *state, FloraScreen *screen) {
     }
     if (screen->widgets) {
         for (int i = 0; i < screen->widget_count; i++) {
-            destroy_flora_widget(&screen->widgets[i]);
+            destroy_flora_widget(screen->widgets[i]);
         }
         free(screen->widgets);
         screen->widgets = NULL;
@@ -30,7 +30,7 @@ void update_screen(FloraScreen *screen, FloraApplicationState *state) {
     }
 
     for (int i = 0; i < screen->widget_count; i++) {
-        FloraWidget *widget = &screen->widgets[i];
+        FloraWidget *widget = screen->widgets[i];
         if (widget && widget->callbacks.update && widget->is_visible) {
             widget->callbacks.update(widget, state);
         }
@@ -45,13 +45,13 @@ void update_screen(FloraScreen *screen, FloraApplicationState *state) {
                     break;
                 }
                 case FLORA_MOUSE_DOWN: {
-                    for (int i = 0; i < screen->widget_count; i++) {
-                        FloraWidget *widget = &screen->widgets[i];
+                    // Do this backwards, last rendered is first to receive
+                    for (int i = screen->widget_count-1; i > -1; i--) {
+                        FloraWidget *widget = screen->widgets[i];
                         if (widget->is_visible && widget->callbacks.on_mouse_down
                             && widget_contains_point(widget, (int) event->as.mouse_button.x,
                                                      (int) event->as.mouse_button.y)) {
                             widget->callbacks.on_mouse_down(widget, state);
-                            // TODO: How should event propagation be handled
                             break; // Stop after the first widget handles the event
                         }
                     }
@@ -102,6 +102,419 @@ void update_screen(FloraScreen *screen, FloraApplicationState *state) {
     }
 }
 
+void demo_screen_create(FloraApplicationState *state, FloraScreen *screen) {
+    TTF_Font *font = add_font(state, OPEN_SANS_FONT_PATH, 18);
+    TTF_Font *title_font = add_font(state, OPEN_SANS_FONT_PATH, 32);
+
+    // Main container - full window with dark background
+    FloraWidget *mainContainer = create_box_widget(
+        state,
+        NULL,
+        (FloraWidgetStyle){
+            .inner_colour = FLORA_SLATE_900,
+            .border_colour = FLORA_SLATE_700,
+            .padding = (FloraPadding){20.0f, 20.0f, 20.0f, 20.0f},
+            .gap = (FloraGap){.x = 0.0f, .y = 20.0f},
+            .layout_direction = TOP_TO_BOTTOM,
+            .sizing = (FloraSizing){
+                .width = FLORA_WIDTH_FIXED(760),
+                .height = FLORA_HEIGHT_FIT(0)
+            },
+            .position = (FloraPosition){.x = 20, .y = 20}
+        },
+        (FloraWidgetCallbacks){
+            .update = NULL,
+            .render = base_box_widget_render,
+            .on_mouse_down = NULL,
+            .on_destroy = NULL
+        },
+        true
+    );
+
+    // Header section
+    FloraWidget *header = create_box_widget(
+        state,
+        mainContainer,
+        (FloraWidgetStyle){
+            .inner_colour = FLORA_INDIGO_600,
+            .border_colour = FLORA_INDIGO_400,
+            .padding = (FloraPadding){20.0f, 20.0f, 15.0f, 15.0f},
+            .gap = (FloraGap){.x = 0.0f, .y = 10.0f},
+            .layout_direction = TOP_TO_BOTTOM,
+            .sizing = (FloraSizing){
+                .width = FLORA_WIDTH_GROW(1),
+                .height = FLORA_HEIGHT_FIT(0)
+            },
+            .position = (FloraPosition){.x = 0, .y = 0}
+        },
+        (FloraWidgetCallbacks){
+            .update = NULL,
+            .render = base_box_widget_render,
+            .on_mouse_down = base_box_widget_on_mouse_down,
+            .on_destroy = NULL
+        },
+        true
+    );
+
+    FloraWidget *headerTitle = create_text_widget(
+        state, header,
+        (FloraWidgetStyle){
+            .position = (FloraPosition){.x = 0, .y = 0},
+            .sizing = {.width = FLORA_WIDTH_FIXED(0), .height = FLORA_HEIGHT_FIXED(0)},
+            .text_colour = FLORA_WHITE,
+            .font_size = 32
+        },
+        (FloraWidgetCallbacks){.render = base_text_widget_render},
+        true, "Flora Engine Demo", 18, title_font
+    );
+
+    FloraWidget *headerSubtitle = create_text_widget(
+        state, header,
+        (FloraWidgetStyle){
+            .position = (FloraPosition){.x = 0, .y = 0},
+            .sizing = {.width = FLORA_WIDTH_FIXED(0), .height = FLORA_HEIGHT_FIXED(0)},
+            .text_colour = FLORA_INDIGO_200,
+            .font_size = 18
+        },
+        (FloraWidgetCallbacks){.render = base_text_widget_render},
+        true, "Click widgets to randomize colors", 34, font
+    );
+
+    add_child_widget(header, headerTitle);
+    add_child_widget(header, headerSubtitle);
+    add_child_widget(mainContainer, header);
+
+    // Button row
+    FloraWidget *buttonRow = create_box_widget(
+        state,
+        mainContainer,
+        (FloraWidgetStyle){
+            .inner_colour = FLORA_SLATE_800,
+            .border_colour = FLORA_SLATE_600,
+            .padding = (FloraPadding){15.0f, 15.0f, 15.0f, 15.0f},
+            .gap = (FloraGap){.x = 15.0f, .y = 0.0f},
+            .layout_direction = LEFT_TO_RIGHT,
+            .sizing = (FloraSizing){
+                .width = FLORA_WIDTH_GROW(1),
+                .height = FLORA_HEIGHT_FIT(0)
+            },
+            .position = (FloraPosition){.x = 0, .y = 0}
+        },
+        (FloraWidgetCallbacks){
+            .update = NULL,
+            .render = base_box_widget_render,
+            .on_mouse_down = NULL,
+            .on_destroy = NULL
+        },
+        true
+    );
+
+    // buttons
+    const FloraColour button_colors[] = {FLORA_BLUE_500, FLORA_GREEN_500, FLORA_AMBER_500};
+
+    for (int i = 0; i < 3; i++) {
+        const char *button_labels[] = {"Primary", "Success", "Warning"};
+        FloraWidget *button = create_box_widget(
+            state,
+            buttonRow,
+            (FloraWidgetStyle){
+                .inner_colour = button_colors[i],
+                .border_colour = FLORA_WHITE,
+                .padding = (FloraPadding){12.0f, 12.0f, 10.0f, 10.0f},
+                .gap = (FloraGap){.x = 0.0f, .y = 0.0f},
+                .layout_direction = LEFT_TO_RIGHT,
+                .sizing = (FloraSizing){
+                    .width = FLORA_WIDTH_GROW(1),
+                    .height = FLORA_HEIGHT_FIT(0)
+                },
+                .position = (FloraPosition){.x = 0, .y = 0}
+            },
+            (FloraWidgetCallbacks){
+                .update = NULL,
+                .render = base_box_widget_render,
+                .on_mouse_down = base_box_widget_on_mouse_down,
+                .on_destroy = NULL
+            },
+            true
+        );
+
+        FloraWidget *buttonText = create_text_widget(
+            state, button,
+            (FloraWidgetStyle){
+                .position = (FloraPosition){.x = 0, .y = 0},
+                .sizing = {.width = FLORA_WIDTH_FIXED(0), .height = FLORA_HEIGHT_FIXED(0)},
+                .text_colour = FLORA_WHITE,
+                .font_size = 18
+            },
+            (FloraWidgetCallbacks){.render = base_text_widget_render},
+            true, (char *) button_labels[i], (int)strlen(button_labels[i]), font
+        );
+
+        add_child_widget(button, buttonText);
+        add_child_widget(buttonRow, button);
+    }
+
+    add_child_widget(mainContainer, buttonRow);
+
+    // Content area with two columns
+    FloraWidget *contentRow = create_box_widget(
+        state,
+        mainContainer,
+        (FloraWidgetStyle){
+            .inner_colour = FLORA_SLATE_800,
+            .border_colour = FLORA_SLATE_600,
+            .padding = (FloraPadding){15.0f, 15.0f, 15.0f, 15.0f},
+            .gap = (FloraGap){.x = 20.0f, .y = 0.0f},
+            .layout_direction = LEFT_TO_RIGHT,
+            .sizing = (FloraSizing){
+                .width = FLORA_WIDTH_GROW(1),
+                .height = FLORA_HEIGHT_FIXED(300)
+            },
+            .position = (FloraPosition){.x = 0, .y = 0}
+        },
+        (FloraWidgetCallbacks){
+            .update = NULL,
+            .render = base_box_widget_render,
+            .on_mouse_down = NULL,
+            .on_destroy = NULL
+        },
+        true
+    );
+
+    // Left column - Card stack
+    FloraWidget *leftColumn = create_box_widget(
+        state,
+        contentRow,
+        (FloraWidgetStyle){
+            .inner_colour = FLORA_SLATE_700,
+            .border_colour = FLORA_SLATE_500,
+            .padding = (FloraPadding){15.0f, 15.0f, 15.0f, 15.0f},
+            .gap = (FloraGap){.x = 0.0f, .y = 15.0f},
+            .layout_direction = TOP_TO_BOTTOM,
+            .sizing = (FloraSizing){
+                .width = FLORA_WIDTH_GROW(1),
+                .height = FLORA_HEIGHT_GROW(1)
+            },
+            .position = (FloraPosition){.x = 0, .y = 0}
+        },
+        (FloraWidgetCallbacks){
+            .update = NULL,
+            .render = base_box_widget_render,
+            .on_mouse_down = base_box_widget_on_mouse_down,
+            .on_destroy = NULL
+        },
+        true
+    );
+
+    const FloraColour card_colors[] = {FLORA_PURPLE_600, FLORA_PINK_600, FLORA_ROSE_600};
+
+    for (int i = 0; i < 3; i++) {
+        const char *card_texts[] = {"Card 1", "Card 2", "Card 3"};
+        FloraWidget *card = create_box_widget(
+            state,
+            leftColumn,
+            (FloraWidgetStyle){
+                .inner_colour = card_colors[i],
+                .border_colour = FLORA_WHITE,
+                .padding = (FloraPadding){10.0f, 10.0f, 8.0f, 8.0f},
+                .gap = (FloraGap){.x = 0.0f, .y = 0.0f},
+                .layout_direction = LEFT_TO_RIGHT,
+                .sizing = (FloraSizing){
+                    .width = FLORA_WIDTH_GROW(1),
+                    .height = FLORA_HEIGHT_GROW(1)
+                },
+                .position = (FloraPosition){.x = 0, .y = 0}
+            },
+            (FloraWidgetCallbacks){
+                .update = NULL,
+                .render = base_box_widget_render,
+                .on_mouse_down = base_box_widget_on_mouse_down,
+                .on_destroy = NULL
+            },
+            true
+        );
+
+        FloraWidget *cardText = create_text_widget(
+            state, card,
+            (FloraWidgetStyle){
+                .position = (FloraPosition){.x = 0, .y = 0},
+                .sizing = {.width = FLORA_WIDTH_FIXED(0), .height = FLORA_HEIGHT_FIXED(0)},
+                .text_colour = FLORA_WHITE,
+                .font_size = 18
+            },
+            (FloraWidgetCallbacks){.render = base_text_widget_render},
+            true, (char *) card_texts[i], -1, font
+        );
+
+        add_child_widget(card, cardText);
+        add_child_widget(leftColumn, card);
+    }
+
+    add_child_widget(contentRow, leftColumn);
+
+    // Right column - Nested layout
+    FloraWidget *rightColumn = create_box_widget(
+        state,
+        contentRow,
+        (FloraWidgetStyle){
+            .inner_colour = FLORA_CYAN_700,
+            .border_colour = FLORA_CYAN_400,
+            .padding = (FloraPadding){15.0f, 15.0f, 15.0f, 15.0f},
+            .gap = (FloraGap){.x = 0.0f, .y = 15.0f},
+            .layout_direction = TOP_TO_BOTTOM,
+            .sizing = (FloraSizing){
+                .width = FLORA_WIDTH_GROW(1),
+                .height = FLORA_HEIGHT_GROW(1)
+            },
+            .position = (FloraPosition){.x = 0, .y = 0}
+        },
+        (FloraWidgetCallbacks){
+            .update = NULL,
+            .render = base_box_widget_render,
+            .on_mouse_down = base_box_widget_on_mouse_down,
+            .on_destroy = NULL
+        },
+        true
+    );
+
+    FloraWidget *topBox = create_box_widget(
+        state,
+        rightColumn,
+        (FloraWidgetStyle){
+            .inner_colour = FLORA_EMERALD_600,
+            .border_colour = FLORA_EMERALD_300,
+            .padding = (FloraPadding){10.0f, 10.0f, 8.0f, 8.0f},
+            .gap = (FloraGap){.x = 0.0f, .y = 0.0f},
+            .layout_direction = LEFT_TO_RIGHT,
+            .sizing = (FloraSizing){
+                .width = FLORA_WIDTH_GROW(1),
+                .height = FLORA_HEIGHT_GROW(2)
+            },
+            .position = (FloraPosition){.x = 0, .y = 0}
+        },
+        (FloraWidgetCallbacks){
+            .update = NULL,
+            .render = base_box_widget_render,
+            .on_mouse_down = base_box_widget_on_mouse_down,
+            .on_destroy = NULL
+        },
+        true
+    );
+
+    FloraWidget *topBoxText = create_text_widget(
+        state, topBox,
+        (FloraWidgetStyle){
+            .position = (FloraPosition){.x = 0, .y = 0},
+            .sizing = {.width = FLORA_WIDTH_FIXED(0), .height = FLORA_HEIGHT_FIXED(0)},
+            .text_colour = FLORA_WHITE,
+            .font_size = 18
+        },
+        (FloraWidgetCallbacks){.render = base_text_widget_render},
+        true, "Nested Layout", 14, font
+    );
+
+    add_child_widget(topBox, topBoxText);
+    add_child_widget(rightColumn, topBox);
+
+    // Bottom horizontal split
+    FloraWidget *bottomRow = create_box_widget(
+        state,
+        rightColumn,
+        (FloraWidgetStyle){
+            .inner_colour = FLORA_TEAL_600,
+            .border_colour = FLORA_TEAL_300,
+            .padding = (FloraPadding){10.0f, 10.0f, 10.0f, 10.0f},
+            .gap = (FloraGap){.x = 10.0f, .y = 0.0f},
+            .layout_direction = LEFT_TO_RIGHT,
+            .sizing = (FloraSizing){
+                .width = FLORA_WIDTH_GROW(1),
+                .height = FLORA_HEIGHT_GROW(1)
+            },
+            .position = (FloraPosition){.x = 0, .y = 0}
+        },
+        (FloraWidgetCallbacks){
+            .update = NULL,
+            .render = base_box_widget_render,
+            .on_mouse_down = base_box_widget_on_mouse_down,
+            .on_destroy = NULL
+        },
+        true
+    );
+
+    for (int i = 0; i < 2; i++) {
+        FloraWidget *smallBox = create_box_widget(
+            state,
+            bottomRow,
+            (FloraWidgetStyle){
+                .inner_colour = FLORA_SKY_500,
+                .border_colour = FLORA_SKY_200,
+                .padding = (FloraPadding){8.0f, 8.0f, 6.0f, 6.0f},
+                .gap = (FloraGap){.x = 0.0f, .y = 0.0f},
+                .layout_direction = LEFT_TO_RIGHT,
+                .sizing = (FloraSizing){
+                    .width = FLORA_WIDTH_GROW(1),
+                    .height = FLORA_HEIGHT_GROW(1)
+                },
+                .position = (FloraPosition){.x = 0, .y = 0}
+            },
+            (FloraWidgetCallbacks){
+                .update = NULL,
+                .render = base_box_widget_render,
+                .on_mouse_down = base_box_widget_on_mouse_down,
+                .on_destroy = NULL
+            },
+            true
+        );
+
+        add_child_widget(bottomRow, smallBox);
+    }
+
+    add_child_widget(rightColumn, bottomRow);
+    add_child_widget(contentRow, rightColumn);
+    add_child_widget(mainContainer, contentRow);
+
+    // Footer
+    FloraWidget *footer = create_box_widget(
+        state,
+        mainContainer,
+        (FloraWidgetStyle){
+            .inner_colour = FLORA_SLATE_700,
+            .border_colour = FLORA_SLATE_500,
+            .padding = (FloraPadding){15.0f, 15.0f, 10.0f, 10.0f},
+            .gap = (FloraGap){.x = 0.0f, .y = 0.0f},
+            .layout_direction = LEFT_TO_RIGHT,
+            .sizing = (FloraSizing){
+                .width = FLORA_WIDTH_GROW(1),
+                .height = FLORA_HEIGHT_FIT(0)
+            },
+            .position = (FloraPosition){.x = 0, .y = 0}
+        },
+        (FloraWidgetCallbacks){
+            .update = NULL,
+            .render = base_box_widget_render,
+            .on_mouse_down = base_box_widget_on_mouse_down,
+            .on_destroy = NULL
+        },
+        true
+    );
+
+    FloraWidget *footerText = create_text_widget(
+        state, footer,
+        (FloraWidgetStyle){
+            .position = (FloraPosition){.x = 0, .y = 0},
+            .sizing = {.width = FLORA_WIDTH_FIXED(0), .height = FLORA_HEIGHT_FIXED(0)},
+            .text_colour = FLORA_SLATE_300,
+            .font_size = 18
+        },
+        (FloraWidgetCallbacks){.render = base_text_widget_render},
+        true, "Press ESC to quit", 18, font
+    );
+
+    add_child_widget(footer, footerText);
+    add_child_widget(mainContainer, footer);
+}
+
+
 void render_screen(FloraScreen *screen, FloraApplicationState *state) {
     if (!screen || !state) {
         fprintf(stderr, "Error: Invalid screen or state.\n");
@@ -109,32 +522,12 @@ void render_screen(FloraScreen *screen, FloraApplicationState *state) {
     }
 
     for (int i = 0; i < screen->widget_count; i++) {
-        FloraWidget *widget = &screen->widgets[i];
+        FloraWidget *widget = screen->widgets[i];
         if (widget->is_visible && widget->callbacks.render) {
             widget->callbacks.render(widget, state);
         }
     }
 }
-
-int add_widget_to_screen(FloraScreen *screen, FloraWidget widget) {
-    if (!screen) {
-        return false;
-    }
-    if (screen->widget_count + 1 > screen->widget_capacity) {
-        int new_capacity = screen->widget_capacity * 2;
-        FloraWidget *new_widgets = realloc(screen->widgets, new_capacity * sizeof(FloraWidget));
-        if (!new_widgets) {
-            fprintf(stderr, "Error: Failed to allocate memory for new widgets.\n");
-            return false;
-        }
-        screen->widgets = new_widgets;
-        screen->widget_capacity = new_capacity;
-    }
-    screen->widgets[screen->widget_count++] = widget;
-    printf("Log: Widget added to screen. Total widgets: %d\n", screen->widget_count);
-    return screen->widget_count - 1;
-}
-
 
 void base_screen_create(FloraApplicationState *state, FloraScreen *screen) {
     FloraWidget *baseWidget = create_box_widget(
@@ -288,12 +681,11 @@ void base_screen_create(FloraApplicationState *state, FloraScreen *screen) {
 
 
 bool init_flora_screen(FloraScreen *screen, FloraApplicationState *state) {
-    screen->on_screen_create = base_screen_create;
+    screen->on_screen_create = demo_screen_create; // TODO: change this for a different demo
     screen->on_screen_destroy = base_screen_destroy;
     screen->widget_count = 0;
     screen->widget_capacity = INITIAL_WIDGET_CAPACITY;
-    screen->widgets =
-            (FloraWidget *) calloc(screen->widget_capacity, sizeof(FloraWidget));
+    screen->widgets = (FloraWidget **) malloc(screen->widget_capacity * sizeof(FloraWidget *));
     if (!screen->widgets) {
         printf("Log: Failed to allocate memory for scene widgets. Aborting!\n");
         fprintf(stderr, "Error: Failed to allocate memory for scene widgets.\n");

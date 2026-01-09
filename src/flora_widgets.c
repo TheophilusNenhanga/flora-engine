@@ -239,8 +239,8 @@ FloraWidget *create_box_widget(FloraApplicationState *state, FloraWidget *parent
     }
 
     if (screen->widget_count == screen->widget_capacity) {
-        FloraWidget *new_widgets = realloc(screen->widgets,
-                                           screen->widget_capacity * GROWTH_FACTOR * sizeof(FloraWidget));
+        FloraWidget **new_widgets = realloc(screen->widgets,
+                                            screen->widget_capacity * GROWTH_FACTOR * sizeof(FloraWidget *));
         if (!new_widgets) {
             fprintf(stderr, "Error: Could not reallocate widgets.");
             return NULL;
@@ -249,12 +249,24 @@ FloraWidget *create_box_widget(FloraApplicationState *state, FloraWidget *parent
         screen->widget_capacity = screen->widget_capacity * GROWTH_FACTOR;
     }
 
-    screen->widgets[screen->widget_count++] = (FloraWidget){
-        .id = screen->widget_count - 1, .type = FLORA_BOX, .parent = parent, .children = NULL,
-        .child_count = 0, .style = style, .is_visible = is_visible, .child_capacity = INITIAL_CHILD_WIDGET_CAPACITY,
-        .callbacks = callbacks
-    };
-    return &screen->widgets[screen->widget_count - 1];
+    FloraWidget *new_widget = calloc(1, sizeof(FloraWidget));
+    if (!new_widget) {
+        fprintf(stderr, "Error: Could not allocate widget.\n");
+        return NULL;
+    }
+    new_widget->id = screen->widget_count++;
+    new_widget->is_visible = is_visible;
+    new_widget->style = style;
+    new_widget->callbacks = callbacks;
+    new_widget->child_capacity = INITIAL_CHILD_WIDGET_CAPACITY;
+    new_widget->parent = parent;
+    new_widget->children = NULL;
+    new_widget->child_count = 0;
+    new_widget->type = FLORA_BOX;
+
+    screen->widgets[screen->widget_count - 1] = new_widget;
+
+    return new_widget;
 }
 
 // Length must be -1 if using a non-owned content.
@@ -274,8 +286,8 @@ FloraWidget *create_text_widget(FloraApplicationState *state, FloraWidget *paren
     }
 
     if (screen->widget_count == screen->widget_capacity) {
-        FloraWidget *new_widgets = realloc(screen->widgets,
-                                           screen->widget_capacity * GROWTH_FACTOR * sizeof(FloraWidget));
+        FloraWidget **new_widgets = realloc(screen->widgets,
+                                            screen->widget_capacity * GROWTH_FACTOR * sizeof(FloraWidget));
         if (!new_widgets) {
             fprintf(stderr, "Error: Could not reallocate widgets.\n");
             return NULL;
@@ -287,8 +299,10 @@ FloraWidget *create_text_widget(FloraApplicationState *state, FloraWidget *paren
         fprintf(stderr, "Error: Text font widget created with a null font.\n");
         return NULL;
     }
-    // TODO: Investigate why TTF_RenderTExt_Blended_Wrapped fails
-    SDL_Surface *surface = TTF_RenderText_Blended(font, text, length,
+
+    const int length_to_render = length < 0 ? 0 : length;
+
+    SDL_Surface *surface = TTF_RenderText_Blended(font, text, length_to_render,
                                                   (SDL_Color){
                                                       style.text_colour.r, style.text_colour.g,
                                                       style.text_colour.b, style.text_colour.a
@@ -324,15 +338,32 @@ FloraWidget *create_text_widget(FloraApplicationState *state, FloraWidget *paren
         string = (char *) text;
     }
 
-    screen->widgets[screen->widget_count++] = (FloraWidget){
-        .id = screen->widget_count - 1, .type = FLORA_TEXT, .parent = parent, .children = NULL,
-        .child_count = 0, .style = style, .is_visible = is_visible, .child_capacity = INITIAL_CHILD_WIDGET_CAPACITY,
-        .callbacks = callbacks,
-        .as.text = {
-            .content = string, .length = length, .font = font, .surface = surface, .texture = texture
-        },
-    };
-    return &screen->widgets[screen->widget_count - 1];
+    FloraWidget *new_widget = calloc(1, sizeof(FloraWidget));
+    if (!new_widget) {
+        if (length > 0) {
+            free(string);
+        }
+        fprintf(stderr, "Error: Could not allocate widget.\n");
+        return NULL;
+    }
+    new_widget->id = screen->widget_count++;
+    new_widget->is_visible = is_visible;
+    new_widget->style = style;
+    new_widget->callbacks = callbacks;
+    new_widget->child_capacity = INITIAL_CHILD_WIDGET_CAPACITY;
+    new_widget->parent = parent;
+    new_widget->children = NULL;
+    new_widget->child_count = 0;
+    new_widget->type = FLORA_TEXT;
+
+    new_widget->as.text.content = string;
+    new_widget->as.text.length = length;
+    new_widget->as.text.font = font;
+    new_widget->as.text.surface = surface;
+    new_widget->as.text.texture = texture;
+
+    screen->widgets[screen->widget_count - 1] = new_widget;
+    return new_widget;
 }
 
 bool add_child_widget(FloraWidget *widget, FloraWidget *child) {
@@ -380,17 +411,7 @@ void base_box_widget_render(FloraWidget *widget, FloraApplicationState *state) {
 }
 
 void base_box_widget_update(FloraWidget *widget, FloraApplicationState *state) {
-    float new_x = widget->style.position.x + 24 * state->delta_time;
-    float new_y = widget->style.position.y + 24 * state->delta_time;
-
-    if (new_x + widget->style.sizing.width.value > state->window_width) {
-        new_x = 0;
-    }
-    if (new_y + widget->style.sizing.height.value > state->window_height) {
-        new_y = 0;
-    }
-    widget->style.position.x = new_x;
-    widget->style.position.y = new_y;
+    (void) widget;
 }
 
 void base_box_widget_on_mouse_down(FloraWidget *widget, FloraApplicationState *state) {
@@ -400,9 +421,6 @@ void base_box_widget_on_mouse_down(FloraWidget *widget, FloraApplicationState *s
     };
     widget->style.border_colour = (FloraColour){
         .r = rand() % 255, .g = rand() % 255, .b = rand() % 255, .a = rand() % 255
-    };
-    widget->style.padding = (FloraPadding){
-        .bottom = RAND(10, 50), .left = RAND(10, 50), .right = RAND(10, 50), .top = RAND(10, 50)
     };
 }
 
